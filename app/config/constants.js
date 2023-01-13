@@ -1,6 +1,6 @@
 export default {
-    primary: '#fc5c65',
-    secondary: '#4ecdc4',
+    colorPrimary: '#fc5c65',
+    colorSecondary: '#4ecdc4',
 
     screenHome: 'Home',
     screenPushCartMap: 'PushCartMap',
