@@ -1,7 +1,7 @@
 import React, { useState, useRef, useContext } from 'react';
 import { View, StyleSheet, ImageBackground, Image, TextInput, Button } from 'react-native'
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
-import firebase from '../../firebase';
+import { firebase, firebaseConfig, db } from '../../firebase';
 
 import constants from '../config/constants'
 import { PCPLogo, PCPButton, PCPTextInput } from '../components';
@@ -39,7 +39,12 @@ export default function WelcomeScreen({ navigation }) {
                 console.log("JSON: USER RECEIVED");
                 console.log(JSON.stringify(result));
                 setUser(result.user);
-                navigation.navigate(constants.screenPushCartMap);
+                if (result.additionalUserInfo.isNewUser) {
+                    // show profile screen
+                    console.log("show profile screen")
+                } else {
+                    navigation.navigate(constants.screenPushCartMap);
+                }
             });
     }
 
@@ -47,7 +52,7 @@ export default function WelcomeScreen({ navigation }) {
         <View style={styles.container}>
             <FirebaseRecaptchaVerifierModal
                 ref={recaptchaVerifier}
-                firebaseConfig={firebase.firebaseConfig}
+                firebaseConfig={firebaseConfig}
             />
             <ImageBackground
                 blurRadius={5}

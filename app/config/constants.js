@@ -2,8 +2,8 @@ export default {
     primary: '#fc5c65',
     secondary: '#4ecdc4',
 
-    screenHome: '',
-    screenPushCartMap: '',
+    screenHome: 'Home',
+    screenPushCartMap: 'PushCartMap',
 
 
     // ONLY FOR TESTING, PLEASE RESET FOR PRODUCTION
