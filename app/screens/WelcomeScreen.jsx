@@ -7,7 +7,7 @@ import constants from '../config/constants'
 import { PCPLogo, PCPButton, PCPTextInput } from '../components';
 import { UserContext } from '../context/UserContext';
 
-export default function WelcomeScreen({ navigation }) {
+const WelcomeScreen = ({ navigation }) => {
     const { user, setUser } = useContext(UserContext);
     const [phoneNumber, setPhoneNumber] = useState(constants.defaultPhoneNumber);
     const [verificationCode, setVerificationCode] = useState(constants.defaultVerificationCode);
@@ -53,6 +53,7 @@ export default function WelcomeScreen({ navigation }) {
             <FirebaseRecaptchaVerifierModal
                 ref={recaptchaVerifier}
                 firebaseConfig={firebaseConfig}
+                attemptInvisibleVerification={false}
             />
             <ImageBackground
                 blurRadius={5}
@@ -99,6 +100,8 @@ export default function WelcomeScreen({ navigation }) {
         </View>
     )
 }
+
+export default WelcomeScreen;
 
 const styles = StyleSheet.create({
     container: {
