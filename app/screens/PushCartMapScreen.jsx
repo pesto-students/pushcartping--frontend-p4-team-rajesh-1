@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { StyleSheet, View, Text, StatusBar, TouchableOpacity, ScrollView, RefreshControl } from 'react-native'
 
 import { UserContext } from '../context/UserContext';
@@ -9,9 +9,21 @@ import constants from '../config/constants';
 
 const PushCartMapScreen = ({ navigation }) => {
     const { user, setUser } = useContext(UserContext);
-    const { pushCartList, setPushCartList } = useContext(PushCartContext);
+    const { pushCartList, setPushCartList, selectedPushCart, setSelectedPushCart } = useContext(PushCartContext);
+    const [trigger, setTrigger] = useState(0);
 
-    console.log("Hello key", process.env.GOOGLE_MAPS_API_KEY)
+    // console.log("Hello key", process.env.GOOGLE_MAPS_API_KEY)
+
+    const scrollToItem = (index) => {
+        console.log('call scrolltoitem in PushCartMapScreen, index:', index)
+        setTrigger(index);
+    }
+
+    const navigateToPushCart = (index) => {
+        console.log('tryin to navigate to pushcart, index:', index)
+        setSelectedPushCart(pushCartList[index - 1])
+        navigation.navigate(constants.screenPushCartDetails)
+    }
 
     useEffect(() => {
         var docRef = db.collection("dummyUsers").doc("user1");
@@ -31,9 +43,9 @@ const PushCartMapScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <View style={styles.mapDisplay}>
-                <MapDisplay />
+                <MapDisplay scrollToItem={scrollToItem} />
             </View>
-            <PushCartList />
+            <PushCartList navigateToPushCart={navigateToPushCart} trigger={trigger} />
         </View>
     )
 }

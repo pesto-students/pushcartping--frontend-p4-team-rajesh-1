@@ -10,7 +10,7 @@ import * as Location from 'expo-location';
 import constants from '../config/constants'
 import { PushCartContext } from '../context/PushCartContext';
 
-const MapDisplay = () => {
+const MapDisplay = ({ scrollToItem }) => {
     const [location, setLocation] = useState(null);
     const { pushCartList, setPushCartList } = useContext(PushCartContext);
     const ref = useRef();
@@ -46,17 +46,24 @@ const MapDisplay = () => {
 
             let loc = await Location.getCurrentPositionAsync({});
 
-            console.log('LOCATION:');
-            console.log(JSON.stringify(loc));
+            if (constants.userLocationLat && constants.userLocationLng) {
+                setLocation({
+                    latitude: constants.userLocationLat,
+                    longitude: constants.userLocationLng,
+                    latitudeDelta: 0.004,
+                    longitudeDelta: 0.004,
+                })
+            } else {
+                console.log('LOCATION:');
+                console.log(JSON.stringify(loc));
 
-            let region = {
-                latitude: loc.coords.latitude,
-                longitude: loc.coords.longitude,
-                latitudeDelta: 0.004,
-                longitudeDelta: 0.004,
+                setLocation({
+                    latitude: loc.coords.latitude,
+                    longitude: loc.coords.longitude,
+                    latitudeDelta: 0.004,
+                    longitudeDelta: 0.004,
+                })
             }
-
-            setLocation(region);
         })();
     }, []);
 
@@ -73,11 +80,16 @@ const MapDisplay = () => {
             >
                 {
                     pushCartList.map(
-                        (item) =>
+                        (item, index) =>
                             <Marker
                                 coordinate={{ latitude: item.lat, longitude: item.lng }}
                                 title={item.name}
                                 pinColor={constants.mapPinColorList[item.id]}
+                                key={index}
+                                onPress={(e) => {
+                                    console.log('marker onPress:', index)
+                                    scrollToItem(index);
+                                }}
                             />)
                 }
             </MapView>

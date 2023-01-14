@@ -4,6 +4,7 @@ export const PushCartContext = createContext();
 
 export const PushCartContextProvider = ({ children }) => {
     const [pushCartList, setPushCartList] = useState({});
+    const [selectedPushCart, setSelectedPushCart] = useState(0);
 
     const fetchData = useCallback(async () => {
         try {
@@ -20,7 +21,7 @@ export const PushCartContextProvider = ({ children }) => {
     }, []);
 
     return (
-        <PushCartContext.Provider value={{ pushCartList: pushCartList, setPushCartList: setPushCartList }}>
+        <PushCartContext.Provider value={{ pushCartList, setPushCartList, selectedPushCart, setSelectedPushCart }}>
             {children}
         </PushCartContext.Provider>
     );

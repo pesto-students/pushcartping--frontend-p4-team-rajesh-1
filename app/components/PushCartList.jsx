@@ -1,13 +1,30 @@
 import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native'
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect, useRef } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
 
 import constants from '../config/constants'
 import { PushCartContext } from '../context/PushCartContext';
 import PushCart from './PushCart'
 
-const PushCartList = () => {
+const PushCartList = ({ navigateToPushCart, trigger }) => {
     const { pushCartList, setPushCartList } = useContext(PushCartContext);
+    const refFlatList = useRef(null)
+
+    const scrolltoListItem = () => {
+        console.log('PushCartList scrolltoListItem')
+    }
+
+    useEffect(() => {
+        if (trigger) {
+            log(trigger);
+        }
+    }, [trigger]);
+
+    const log = (trigger) => {
+        console.log("call from parent");
+        refFlatList.current?.scrollToIndex({ animated: true, index: trigger });
+    };
 
     return (
         <>
@@ -17,13 +34,22 @@ const PushCartList = () => {
             </TouchableOpacity>
 
             <FlatList
+                ref={refFlatList}
                 data={pushCartList}
-                renderItem={({ item }) => <PushCart cart={item} />}
+                renderItem={({ item }) =>
+                    <TouchableOpacity
+                        onPress={() => {
+                            console.log('somthing with item: ', item)
+                            navigateToPushCart(item.id)
+                        }}>
+                        <PushCart cart={item} />
+                    </TouchableOpacity>
+                }
                 keyExtractor={item => item.id}
-                contentContainerStyle={{
-                    flexGrow: 1,
-                    paddingBottom: 20,
-                }}
+                // contentContainerStyle={{
+                //     flexGrow: 1,
+                //     paddingBottom: 20,
+                // }}
                 style={styles.carts}
             />
         </>
@@ -53,6 +79,6 @@ const styles = StyleSheet.create({
     },
     carts: {
         paddingHorizontal: 10,
-        marginBottom: 20,
+        marginBottom: 30,
     },
 })
