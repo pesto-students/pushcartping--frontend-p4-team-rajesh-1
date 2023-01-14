@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { WelcomeScreen, PushCartMapScreen } from './app/screens'
+import { WelcomeScreen, PushCartMapScreen, NewVendorScreen } from './app/screens'
 import { UserContextProvider } from './app/context/UserContext';
 import { PushCartContextProvider } from './app/context/PushCartContext';
 import constants from './app/config/constants';
@@ -17,6 +17,7 @@ export default function App() {
           <Stack.Navigator initialRouteName={constants.screenHome} screenOptions={{ headerShown: false }}>
             <Stack.Screen name={constants.screenHome} component={WelcomeScreen} />
             <Stack.Screen name={constants.screenPushCartMap} component={PushCartMapScreen} />
+            <Stack.Screen name={constants.screenNewVendor} component={NewVendorScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </PushCartContextProvider>

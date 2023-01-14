@@ -15,7 +15,6 @@ const PushCartList = () => {
                 <Text style={styles.header_text}>{pushCartList.length} Push Carts <Text style={{ fontWeight: 'normal' }}>detected near you</Text></Text>
                 <Ionicons style={styles.header_filter} name="refresh-sharp" size={30} color="black" />
             </TouchableOpacity>
-            {/* <PushCart cart={samplePushcarts[0]} /> */}
 
             <FlatList
                 data={pushCartList}

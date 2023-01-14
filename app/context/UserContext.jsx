@@ -1,9 +1,12 @@
 import { createContext, useState, useEffect, useCallback } from "react";
 
+import constants from "../config/constants";
+
 export const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
     const [user, setUser] = useState({});
+    const [userType, setUserType] = useState(constants.userTypeCustomer);
 
     const fetchData = useCallback(async () => {
         try {
@@ -38,7 +41,7 @@ export const UserContextProvider = ({ children }) => {
     }, [fetchData]);
 
     return (
-        <UserContext.Provider value={{ user: user, setUser: setUser }}>
+        <UserContext.Provider value={{ user: user, setUser: setUser, userType: userType, setUserType: setUserType }}>
             {children}
         </UserContext.Provider>
     );
