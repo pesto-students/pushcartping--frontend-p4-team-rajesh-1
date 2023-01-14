@@ -10,6 +10,7 @@ export default {
     screenPushCartMap: 'PushCartMap',
     screenPushCartDetails: 'PushCartDetails',
     screenNewVendor: 'NewVendor',
+    screenNewCustomer: 'NewCustomer',
 
     userTypeCustomer: 0,
     userTypeVendor: 1,
@@ -19,6 +20,7 @@ export default {
     userSwitchColorVendor: '#blue',
 
     mapSearchBarColor: '#ffffff',
+    mapPinColor: 'purple',
     mapPinColorList: ['red', 'blue', 'orange', 'turquoise', 'green', 'gold', 'wheat', 'linen', 'tan', 'tomato', 'aqua', 'teal', 'violet', 'purple', 'indigo', 'yellow', 'navy', 'plum'],
 
 

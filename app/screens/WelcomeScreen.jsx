@@ -43,13 +43,19 @@ const WelcomeScreen = ({ navigation }) => {
                 console.log(JSON.stringify(result));
                 setUser(result.user);
 
+                // For TESTING ONLY
+                navigation.navigate(constants.screenNewCustomer);
+                return;
+
                 if (result.additionalUserInfo.isNewUser) {
                     // show profile screen
                     console.log("show profile screen, userType:", userType)
                     if (userType === constants.userTypeCustomer) {
                         console.log('New Customer')
+                        navigation.navigate(constants.screenNewCustomer)
                     } if (userType === constants.userTypeVendor) {
                         console.log('New Vendor')
+                        navigation.navigate(constants.screenNewVendor)
                     }
                 } else {
                     navigation.navigate(constants.screenPushCartMap);
