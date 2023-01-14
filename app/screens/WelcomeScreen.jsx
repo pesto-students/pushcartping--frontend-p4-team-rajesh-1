@@ -4,7 +4,7 @@ import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-fi
 import { firebase, firebaseConfig, db, auth } from '../../firebase';
 
 import constants from '../config/constants'
-import { PCPLogo, PCPButton, PCPTextInput, UserSwitch } from '../components';
+import { PCPLogo, PCPButton, PCPTextInput, UserSwitch, UserInput } from '../components';
 import { UserContext } from '../context/UserContext';
 
 const attemptInvisibleVerification = true
@@ -18,11 +18,11 @@ const WelcomeScreen = ({ navigation }) => {
 
     // Function to be called when requesting for a verification code
     const verifyPhoneNumber = async () => {
-        console.log("Verify Phone: ", userType)
-        // const phoneProvider = new firebase.auth.PhoneAuthProvider();
-        // phoneProvider
-        //     .verifyPhoneNumber(phoneNumber, recaptchaVerifier.current)
-        //     .then(setVerificationId);
+        console.log("Verify Phone: ", userType, 'phone:', phoneNumber)
+        const phoneProvider = new firebase.auth.PhoneAuthProvider();
+        phoneProvider
+            .verifyPhoneNumber(phoneNumber, recaptchaVerifier.current)
+            .then(setVerificationId);
     };
 
     // Function to be called when confirming the verification code that we received from Firebase via SMS
@@ -80,38 +80,23 @@ const WelcomeScreen = ({ navigation }) => {
                 <View style={styles.form}>
                     <UserSwitch />
 
-                    <TextInput
-                        style={styles.text}
-                        placeholder="Phone Number"
+                    <UserInput
+                        placeholder='Phone Number'
                         defaultValue={constants.defaultPhoneNumber}
                         onChangeText={setPhoneNumber}
-                        keyboardType="phone-pad"
-                        autoCompleteType="tel"
-                        textAlign={'center'}
-                    />
-
-                    <Button
-                        style={styles.button}
-                        onPress={verifyPhoneNumber}
-                        title="Get Verification Code"
-                        color={constants.colorButton}
+                        buttonTitle='Get Verification Code'
+                        buttonColor={constants.colorButton}
+                        onButtonPress={verifyPhoneNumber}
                         accessibilityLabel="Click here to submit phone number"
                     />
 
-                    <TextInput
-                        style={styles.text}
-                        placeholder="Verification Code"
+                    <UserInput
+                        placeholder='Verification Code'
                         defaultValue={constants.defaultVerificationCode}
                         onChangeText={setVerificationCode}
-                        keyboardType="number-pad"
-                        textAlign={'center'}
-                    />
-
-                    <Button
-                        style={styles.button}
-                        onPress={verifyCode}
-                        title="Submit"
-                        color={constants.colorButton}
+                        buttonTitle='Submit'
+                        buttonColor={constants.colorButton}
+                        onButtonPress={verifyCode}
                         accessibilityLabel="Click here to submit phone number"
                     />
                 </View>
@@ -141,7 +126,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 20,
         width: '60%',
-        // justifyContent: 'space-between'
     },
     text: {
         position: 'relative',
