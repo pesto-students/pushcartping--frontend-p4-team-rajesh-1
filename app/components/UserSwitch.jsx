@@ -6,10 +6,10 @@ import constants from '../config/constants';
 import { UserContext } from '../context/UserContext';
 
 const UserSwitch = () => {
-    const { userType, setUserType } = useContext(UserContext);
+    const { userData, setUserData } = useContext(UserContext);
 
     useEffect(() => {
-        setUserType(constants.userTypeCustomer)
+        setUserData({ type: constants.userTypeCustomer })
     }, []);
 
     return (

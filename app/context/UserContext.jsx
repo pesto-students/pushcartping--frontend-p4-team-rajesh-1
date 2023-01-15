@@ -6,7 +6,7 @@ export const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
     const [user, setUser] = useState({});
-    const [userType, setUserType] = useState(constants.userTypeCustomer);
+    const [userData, setUserData] = useState({ type: constants.userTypeCustomer });
 
     const fetchData = useCallback(async () => {
         try {
@@ -41,7 +41,7 @@ export const UserContextProvider = ({ children }) => {
     }, [fetchData]);
 
     return (
-        <UserContext.Provider value={{ user: user, setUser: setUser, userType: userType, setUserType: setUserType }}>
+        <UserContext.Provider value={{ user, setUser, userData, setUserData }}>
             {children}
         </UserContext.Provider>
     );

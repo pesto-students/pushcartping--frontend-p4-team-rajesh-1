@@ -4,11 +4,11 @@ import React, { useContext } from 'react'
 import { UserContext } from '../context/UserContext';
 
 const NewVendorScreen = () => {
-    const { userType, setUserType } = useContext(UserContext);
+    const { userData, setUserData } = useContext(UserContext);
 
     return (
         <View>
-            <Text>USERTYPE: {userType}</Text>
+            <Text>USERTYPE: {userData.type}</Text>
         </View>
     )
 }

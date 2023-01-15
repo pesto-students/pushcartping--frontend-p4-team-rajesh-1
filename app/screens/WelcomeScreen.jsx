@@ -10,7 +10,7 @@ import { UserContext } from '../context/UserContext';
 const attemptInvisibleVerification = true
 
 const WelcomeScreen = ({ navigation }) => {
-    const { user, setUser, userType, setUserType } = useContext(UserContext);
+    const { user, setUser, userData, setUserData } = useContext(UserContext);
     const [phoneNumber, setPhoneNumber] = useState(constants.defaultPhoneNumber);
     const [verificationCode, setVerificationCode] = useState(constants.defaultVerificationCode);
     const [verificationId, setVerificationId] = useState(null);
@@ -18,11 +18,24 @@ const WelcomeScreen = ({ navigation }) => {
 
     // Function to be called when requesting for a verification code
     const verifyPhoneNumber = async () => {
-        console.log("Verify Phone: ", userType, 'phone:', phoneNumber)
-        const phoneProvider = new firebase.auth.PhoneAuthProvider();
-        phoneProvider
-            .verifyPhoneNumber(phoneNumber, recaptchaVerifier.current)
-            .then(setVerificationId);
+        console.log("Verify Phone: ", userData.type, 'phone:', phoneNumber)
+        // const phoneProvider = new firebase.auth.PhoneAuthProvider();
+        // phoneProvider
+        //     .verifyPhoneNumber(phoneNumber, recaptchaVerifier.current)
+        //     .then(setVerificationId);
+
+        auth.signInWithPhoneNumber(phoneNumber)
+            .then((confirmationResult) => {
+                // SMS sent. Prompt user to type the code from the message, then sign the
+                // user in with confirmationResult.confirm(code).
+                console.log('signed in with phone')
+                console.log(JSON.stringify(confirmationResult))
+                // ...
+            }).catch((error) => {
+                // Error; SMS not sent
+                // ...
+                console.log('whoopsie:', error)
+            });
     };
 
     // Function to be called when confirming the verification code that we received from Firebase via SMS
@@ -49,11 +62,11 @@ const WelcomeScreen = ({ navigation }) => {
 
                 if (result.additionalUserInfo.isNewUser) {
                     // show profile screen
-                    console.log("show profile screen, userType:", userType)
-                    if (userType === constants.userTypeCustomer) {
+                    console.log("show profile screen, userType:", userData.type)
+                    if (userData.type === constants.userTypeCustomer) {
                         console.log('New Customer')
                         navigation.navigate(constants.screenNewCustomer)
-                    } if (userType === constants.userTypeVendor) {
+                    } if (userData.type === constants.userTypeVendor) {
                         console.log('New Vendor')
                         navigation.navigate(constants.screenNewVendor)
                     }
@@ -65,13 +78,13 @@ const WelcomeScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <FirebaseRecaptchaVerifierModal
+            {/* <FirebaseRecaptchaVerifierModal
                 ref={recaptchaVerifier}
                 firebaseConfig={firebaseConfig}
                 attemptInvisibleVerification={attemptInvisibleVerification}
                 androidHardwareAccelerationDisabled={true}
                 androidLayerType="software"
-            />
+            /> */}
 
             <ImageBackground
                 blurRadius={5}
