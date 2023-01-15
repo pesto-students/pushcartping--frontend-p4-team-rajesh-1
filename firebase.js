@@ -2,6 +2,8 @@ import firebase from '@react-native-firebase/app';
 import '@react-native-firebase/auth';
 import '@react-native-firebase/firestore';
 
+import constants from './app/config/constants';
+
 const firebaseConfig = {
     apiKey: "AIzaSyBQubaqE2aJuw8Sir8OxwaWaeKP9u6GYcA",
     authDomain: "pushcartping.firebaseapp.com",
@@ -9,7 +11,7 @@ const firebaseConfig = {
     databaseURL: "https://pushcartping.firebaseio.com",
     storageBucket: "pushcartping.appspot.com",
     messagingSenderId: "821602070633",
-    appId: "1:821602070633:web:26ec44894e98c8578a72f8"
+    appId: "1:821602070633:android:c0775063458410d68a72f8"
 };
 
 let app;
@@ -24,3 +26,79 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 export { firebase, firebaseConfig, db, auth };
+
+export const signInWithPhone = (phoneNumber) => {
+    return new Promise((resolve, reject) => {
+        auth.signInWithPhoneNumber(phoneNumber)
+            .then((CR) => {
+                // SMS sent. Prompt user to type the code from the message, then sign the
+                // user in with confirmationResult.confirm(code).
+                console.log('signed in thru phone');
+                resolve({ confirmationResult: CR, codeStatus: 1, responseCode: 1, msg: 'signed in thru phone' })
+                // ...
+            }).catch((error) => {
+                // Error; SMS not sent
+                // ...
+                reject({ msg: 'firebase.signInWithPhone error', responseCode: 0 })
+            });
+    });
+};
+
+export const verifySMSCode = (confirmationResult, verificationCode) => {
+    return new Promise((resolve, reject) => {
+        confirmationResult
+            .confirm(verificationCode)
+            .then((result) => {
+                // User signed in successfully.
+                console.log('Got user')
+                resolve({ responseCode: 1, msg: 'Got user', user: result.user, isNewUser: result.additionalUserInfo.isNewUser })
+            })
+            .catch((error) => {
+                // User couldn't sign in (bad verification code?)
+                // ...
+                console.log('wheres the user')
+                reject({ responseCode: 0, msg: 'firebase.verifyCode failed' })
+            });
+    });
+}
+
+export const addUserToDatabase = ({ userID, userName, userEmail, userPhotoURL }) => {
+    return new Promise((resolve, reject) => {
+        db.collection(constants.db_user_collection)
+            .doc(userID)
+            .get()
+            .then(documentSnapshot => {
+                console.log(documentSnapshot);
+                console.log('User exists: ', documentSnapshot.exists);
+
+                if (documentSnapshot.exists) {
+                    console.log('User data: ', documentSnapshot.data());
+                    reject({ responseCode: 0, msg: 'User already exists' })
+                } else {
+                    db.collection(constants.db_user_collection)
+                        .doc(userID)
+                        .set({
+                            name: userName,
+                            email: userEmail,
+                            photoURL: userPhotoURL,
+                        })
+                        .then(() => {
+                            console.log('User added!');
+                            reject({ responseCode: 1, msg: 'User added' })
+                        })
+                        .catch((error) => {
+                            // User couldn't sign in (bad verification code?)
+                            // ...
+                            console.log('couldnt insert new user')
+                            reject({ responseCode: 0, msg: 'couldnt insert new user' })
+                        });
+                }
+            })
+            .catch((error) => {
+                // User couldn't sign in (bad verification code?)
+                // ...
+                console.log('no user with uid:', userID)
+                reject({ responseCode: 0, msg: `no user with uid: ${userID}` })
+            });
+    });
+}

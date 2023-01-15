@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         // alignItems: 'center',
         // justifyContent: 'center',
-        top: StatusBar.currentHeight,
+        // top: StatusBar.currentHeight,
     },
     mapDisplay: {
         // flex: 1,

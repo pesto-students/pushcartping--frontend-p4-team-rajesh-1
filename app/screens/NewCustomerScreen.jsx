@@ -1,84 +1,50 @@
 import { StyleSheet, Text, View, TextInput, StatusBar, TouchableOpacity, Button } from 'react-native'
-import React, { useContext, useCallback, useState } from 'react'
-import { db } from '../../firebase';
+import React, { useContext, useCallback, useState, useEffect } from 'react'
+import { addUserToDatabase, db } from '../../firebase';
 // import firestore from '@react-native-firebase/firestore';
-// import DocumentPicker from 'react-native-document-picker';
+import DocumentPicker, { types } from 'react-native-document-picker';
 
 import { UserInput } from '../components'
 import { UserContext } from '../context/UserContext'
 import constants from '../config/constants'
 
+const DEFAULT_IMAGE = 'https://firebasestorage.googleapis.com/v0/b/pushcartping.appspot.com/o/fordemo%2Fcustomer.png?alt=media&token=ca1e014f-26c8-435b-81fc-ab1bf444ad08';
+
 const NewCustomerScreen = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+    const [name, setName] = useState('dummy');
+    const [email, setEmail] = useState('dummy@pcp.com');
+    const [image, setImage] = useState(DEFAULT_IMAGE);
     const { user, setUser, userData, setUserData } = useContext(UserContext);
 
-    const imageURL = 'https://firebasestorage.googleapis.com/v0/b/pushcartping.appspot.com/o/fordemo%2Fcustomer.png?alt=media&token=ca1e014f-26c8-435b-81fc-ab1bf444ad08';
-
     const uploadImage = useCallback(async () => {
-        // try {
-        //     const response = await DocumentPicker.pickSingle({
-        //         presentationStyle: 'fullScreen',
-        //     });
-        //     setFileResponse(response);
-        //     console.log("got file, res:", response)
-        // } catch (err) {
-        //     console.warn(err);
-        // }
+        try {
+            const response = await DocumentPicker.pickSingle({
+                presentationStyle: 'fullScreen',
+                type: [types.images],
+            });
+            console.log("got file, res:", response)
+            // setFileResponse(response);
+        } catch (err) {
+            console.warn(err);
+        }
     }, []);
 
     const handleSubmit = async () => {
         console.log('name', name);
         console.log('email', email);
-        console.log('image', imageURL);
+        console.log('image', image);
 
         if (!name && !email)
             return;
 
-        try {
-            const users = await firestore().collection('DummyUsers').get();
-            console.log("reading db:", user);
-        } catch (err) {
-            console.log("nopes:", err)
-        }
-
-        // var docRef = db.collection("dummyUsers").doc(user.uid);
-        // let userExists = false;
-        // docRef.get().then((doc) => {
-        //     if (doc.exists) {
-        //         console.log("Document data:", doc.data());
-        //     } else {
-        //         // doc.data() will be undefined in this case
-        //         console.log("No such document!");
-        //     }
-        //     userExists = doc.exists;
-        // }).catch((error) => {
-        //     console.log("Error getting document:", error);
-        // });
-
-        // if (!userExists) {
-        //     setDoc(doc(db, "dummyUsers", user.uid), {
-        //         name: name,
-        //         email: email,
-        //         image: imageURL
-        //     });
-        // }
+        addUserToDatabase({ userID: user.uid, userName: name, userEmail: email, userPhotoURL: image })
+            .then((response) => {
+                console.log('promise response:', Object.entries(response))
+            })
+            .catch((error) => {
+                console.log('promise error:', error)
+            });
     }
-
-    // useEffect(() => {
-    //     var docRef = db.collection("dummyUsers").doc("user1");
-
-    //     docRef.get().then((doc) => {
-    //         if (doc.exists) {
-    //             console.log("Document data:", doc.data());
-    //         } else {
-    //             // doc.data() will be undefined in this case
-    //             console.log("No such document!");
-    //         }
-    //     }).catch((error) => {
-    //         console.log("Error getting document:", error);
-    //     });
-    // }, []);
 
     return (
         <View style={styles.container}>
@@ -94,6 +60,7 @@ const NewCustomerScreen = () => {
                     onChangeText={text => setName(text)}
                 />
             </View>
+
             <View style={styles.input}>
                 <Text style={styles.inputLabel}>Enter Your Email:</Text>
                 <TextInput
@@ -103,6 +70,7 @@ const NewCustomerScreen = () => {
                     onChangeText={text => setEmail(text)}
                 />
             </View>
+
             <View style={styles.input}>
                 <Text style={styles.inputLabel}>Add a photo</Text>
                 <TouchableOpacity style={styles.button} onPress={uploadImage}>
@@ -120,7 +88,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        top: StatusBar.currentHeight,
+        // top: StatusBar.currentHeight,
         alignItems: 'flex-start',
         marginLeft: 20,
     },

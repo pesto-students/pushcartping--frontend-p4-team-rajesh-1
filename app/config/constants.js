@@ -15,7 +15,6 @@ export default {
     userTypeCustomer: 0,
     userTypeVendor: 1,
 
-
     userSwitchColorCustomer: '#green',
     userSwitchColorVendor: '#blue',
 
@@ -26,9 +25,11 @@ export default {
 
 
     // ONLY FOR TESTING, PLEASE RESET FOR PRODUCTION
-    // defaultPhoneNumber: '+919999999999',
-    defaultPhoneNumber: '+919833242774',
+    defaultPhoneNumber: '+919999999999',
+    // defaultPhoneNumber: '+919833242774',
     defaultVerificationCode: '654321',
     userLocationLat: 13.019864771741265,
     userLocationLng: 80.2552468429313,
+
+    db_user_collection: 'Users',
 }

@@ -16,7 +16,7 @@ const UserSwitch = () => {
         <View style={styles.container}>
             <SwitchSelector
                 initial={constants.userTypeCustomer}
-                onPress={value => setUserType(value)}
+                onPress={value => setUserData(value)}
                 textColor={constants.colorBlack}
                 selectedColor={constants.colorWhite}
                 buttonColor={constants.colorButton}

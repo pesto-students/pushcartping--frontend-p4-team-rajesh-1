@@ -1,7 +1,7 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import { View, StyleSheet, ImageBackground, Image, TextInput, Button, StatusBar } from 'react-native'
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
-import { firebase, firebaseConfig, db, auth } from '../../firebase';
+import { signInWithPhone, verifySMSCode } from '../../firebase';
 
 import constants from '../config/constants'
 import { PCPLogo, PCPButton, PCPTextInput, UserSwitch, UserInput } from '../components';
@@ -14,67 +14,89 @@ const WelcomeScreen = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState(constants.defaultPhoneNumber);
     const [verificationCode, setVerificationCode] = useState(constants.defaultVerificationCode);
     const [verificationId, setVerificationId] = useState(null);
+    const [confirmationResult, setConfirmationResult] = useState(null);
+    const [codeStatus, setCodeStatus] = useState(0);
     const recaptchaVerifier = useRef(null);
 
     // Function to be called when requesting for a verification code
     const verifyPhoneNumber = async () => {
         console.log("Verify Phone: ", userData.type, 'phone:', phoneNumber)
-        // const phoneProvider = new firebase.auth.PhoneAuthProvider();
-        // phoneProvider
-        //     .verifyPhoneNumber(phoneNumber, recaptchaVerifier.current)
-        //     .then(setVerificationId);
-
-        auth.signInWithPhoneNumber(phoneNumber)
-            .then((confirmationResult) => {
-                // SMS sent. Prompt user to type the code from the message, then sign the
-                // user in with confirmationResult.confirm(code).
-                console.log('signed in with phone')
-                console.log(JSON.stringify(confirmationResult))
-                // ...
-            }).catch((error) => {
-                // Error; SMS not sent
-                // ...
-                console.log('whoopsie:', error)
+        signInWithPhone(phoneNumber)
+            .then((response) => {
+                console.log('signInWithPhone response:', Object.keys(response))
+                setConfirmationResult(response.confirmationResult);
+                setCodeStatus(response.codeStatus);
+            })
+            .catch((error) => {
+                console.log('signInWithPhone error:', error)
             });
     };
 
-    // Function to be called when confirming the verification code that we received from Firebase via SMS
-    const verifyCode = () => {
-        const credential = firebase.auth.PhoneAuthProvider.credential(
-            verificationId,
-            verificationCode
-        );
-        firebase
-            .auth()
-            .signInWithCredential(credential)
-            .then((result) => {
-                // Do something with the results here
-                setVerificationCode(constants.defaultVerificationCode);
-                console.log("RAW: USER RECEIVED");
-                console.log(result);
-                console.log("JSON: USER RECEIVED");
-                console.log(JSON.stringify(result));
-                setUser(result.user);
-
-                // For TESTING ONLY
-                navigation.navigate(constants.screenNewCustomer);
-                return;
-
-                if (result.additionalUserInfo.isNewUser) {
-                    // show profile screen
-                    console.log("show profile screen, userType:", userData.type)
-                    if (userData.type === constants.userTypeCustomer) {
-                        console.log('New Customer')
-                        navigation.navigate(constants.screenNewCustomer)
-                    } if (userData.type === constants.userTypeVendor) {
-                        console.log('New Vendor')
-                        navigation.navigate(constants.screenNewVendor)
-                    }
-                } else {
-                    navigation.navigate(constants.screenPushCartMap);
-                }
+    const verifyCode = async () => {
+        verifySMSCode(confirmationResult, verificationCode)
+            .then((response) => {
+                console.log('verifySMSCode response:', Object.keys(response))
+                setUser(response.user);
+                goToNextScreen(response.isNewUser)
+            })
+            .catch((error) => {
+                console.log('verifySMSCode error:', error)
             });
     }
+
+    const goToNextScreen = (isNewUser) => {
+        // For TESTING ONLY
+        // navigation.navigate(constants.screenNewCustomer);
+        // return;
+
+        if (isNewUser) {
+            // show profile screen
+            console.log("show profile screen, userType:", userData.type)
+            if (userData.type === constants.userTypeCustomer) {
+                console.log('New Customer')
+                navigation.navigate(constants.screenNewCustomer)
+            } if (userData.type === constants.userTypeVendor) {
+                console.log('New Vendor')
+                navigation.navigate(constants.screenNewVendor)
+            }
+        } else {
+            navigation.navigate(constants.screenPushCartMap);
+        }
+    }
+
+    // const newVerifyCode = () => {
+    //     confirmationResult
+    //         .confirm(verificationCode)
+    //         .then((result) => {
+    //             // User signed in successfully.
+    //             console.log('Got user', JSON.stringify(user))
+    //             setUser(result.user);
+
+    //             // For TESTING ONLY
+    //             navigation.navigate(constants.screenNewCustomer);
+    //             return;
+
+    //             if (result.additionalUserInfo.isNewUser) {
+    //                 // show profile screen
+    //                 console.log("show profile screen, userType:", userData.type)
+    //                 if (userData.type === constants.userTypeCustomer) {
+    //                     console.log('New Customer')
+    //                     navigation.navigate(constants.screenNewCustomer)
+    //                 } if (userData.type === constants.userTypeVendor) {
+    //                     console.log('New Vendor')
+    //                     navigation.navigate(constants.screenNewVendor)
+    //                 }
+    //             } else {
+    //                 navigation.navigate(constants.screenPushCartMap);
+    //             }
+    //             // ...
+    //         })
+    //         .catch((error) => {
+    //             // User couldn't sign in (bad verification code?)
+    //             // ...
+    //             console.log('wheres the user')
+    //         });
+    // }
 
     return (
         <View style={styles.container}>
@@ -106,6 +128,7 @@ const WelcomeScreen = ({ navigation }) => {
                         buttonTitle='Get Verification Code'
                         buttonColor={constants.colorButton}
                         onButtonPress={verifyPhoneNumber}
+                        buttonDisabled={codeStatus == 0 ? false : true}
                         accessibilityLabel="Click here to submit phone number"
                     />
 
@@ -116,6 +139,7 @@ const WelcomeScreen = ({ navigation }) => {
                         buttonTitle='Submit'
                         buttonColor={constants.colorButton}
                         onButtonPress={verifyCode}
+                        buttonDisabled={codeStatus == 0 ? true : false}
                         accessibilityLabel="Click here to submit phone number"
                     />
                 </View>

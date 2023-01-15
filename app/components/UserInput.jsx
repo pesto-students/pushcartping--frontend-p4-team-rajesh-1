@@ -1,7 +1,7 @@
 import { StyleSheet, TextInput, Button } from 'react-native'
 import React from 'react'
 
-const UserInput = ({ placeholder = 'Enter value', defaultValue = 'Some text', buttonTitle = 'Button', buttonColor = 'dodgerblue', accessibilityLabel = 'Accesibility Label', onChangeText, onButtonPress }) => {
+const UserInput = ({ placeholder = 'Enter value', defaultValue = 'Some text', buttonTitle = 'Button', buttonColor = 'dodgerblue', buttonDisabled = false, accessibilityLabel = 'Accesibility Label', onChangeText, onButtonPress }) => {
     return (
         <>
             <TextInput
@@ -20,6 +20,7 @@ const UserInput = ({ placeholder = 'Enter value', defaultValue = 'Some text', bu
                 title={buttonTitle}
                 color={buttonColor}
                 accessibilityLabel={accessibilityLabel}
+                disabled={buttonDisabled}
             />
         </>
     )
