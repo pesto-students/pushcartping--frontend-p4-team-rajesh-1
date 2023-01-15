@@ -139,7 +139,7 @@ def reactNativeArchitectures() {
 
 dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.0'
-    implementation 'androidx.browser:browser:1.2.0'
+    implementation 'androidx.browser:browser:1.4.0'
 }
 
 android {
