@@ -138,7 +138,7 @@ def reactNativeArchitectures() {
 }
 
 dependencies {
-    implementation 'com.google.firebase:firebase-core:16.0.0'
+    implementation 'com.google.firebase:firebase-core:16.0.9'
     implementation 'androidx.browser:browser:1.2.0'
 }
 
