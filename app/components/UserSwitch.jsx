@@ -37,9 +37,11 @@ export default UserSwitch
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        // flex: 1,
+        marginVertical: 10,
         flexDirection: 'row',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
+        width: '60%',
     },
 })

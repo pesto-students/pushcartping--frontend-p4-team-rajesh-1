@@ -1,35 +1,41 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
-import { View, StyleSheet, ImageBackground, Image, TextInput, Button, StatusBar } from 'react-native'
-import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
+import { View, StyleSheet, ImageBackground, Text, TouchableOpacity } from 'react-native'
+import { FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import { signInWithPhone, verifySMSCode } from '../../firebase';
 
 import constants from '../config/constants'
-import { PCPLogo, PCPButton, PCPTextInput, UserSwitch, UserInput } from '../components';
+import { PCPLogo, UserSwitch, ButtonPCP, InputPCP } from '../components';
 import { UserContext } from '../context/UserContext';
 
 const attemptInvisibleVerification = true
 
 const WelcomeScreen = ({ navigation }) => {
     const { user, setUser, userData, setUserData } = useContext(UserContext);
+
+    const [inputValue, setInputValue] = useState(0);
     const [phoneNumber, setPhoneNumber] = useState(constants.defaultPhoneNumber);
     const [verificationCode, setVerificationCode] = useState(constants.defaultVerificationCode);
-    const [verificationId, setVerificationId] = useState(null);
     const [confirmationResult, setConfirmationResult] = useState(null);
     const [codeStatus, setCodeStatus] = useState(0);
-    const recaptchaVerifier = useRef(null);
+
 
     // Function to be called when requesting for a verification code
     const verifyPhoneNumber = async () => {
-        console.log("Verify Phone: ", userData.type, 'phone:', phoneNumber)
-        signInWithPhone(phoneNumber)
-            .then((response) => {
-                console.log('signInWithPhone response:', Object.keys(response))
-                setConfirmationResult(response.confirmationResult);
-                setCodeStatus(response.codeStatus);
-            })
-            .catch((error) => {
-                console.log('signInWithPhone error:', error)
-            });
+        try {
+            console.log("Verify Phone: ", userData.type, 'phone:', phoneNumber)
+            signInWithPhone(phoneNumber)
+                .then((response) => {
+                    console.log('signInWithPhone response:', Object.keys(response))
+                    setConfirmationResult(response.confirmationResult);
+                    setCodeStatus(response.codeStatus);
+                    setInputValue(2);
+                })
+                .catch((error) => {
+                    console.log('signInWithPhone error:', error)
+                });
+        } catch (error) {
+            console.log('Error in verify phone:', error)
+        }
     };
 
     const verifyCode = async () => {
@@ -64,50 +70,8 @@ const WelcomeScreen = ({ navigation }) => {
         }
     }
 
-    // const newVerifyCode = () => {
-    //     confirmationResult
-    //         .confirm(verificationCode)
-    //         .then((result) => {
-    //             // User signed in successfully.
-    //             console.log('Got user', JSON.stringify(user))
-    //             setUser(result.user);
-
-    //             // For TESTING ONLY
-    //             navigation.navigate(constants.screenNewCustomer);
-    //             return;
-
-    //             if (result.additionalUserInfo.isNewUser) {
-    //                 // show profile screen
-    //                 console.log("show profile screen, userType:", userData.type)
-    //                 if (userData.type === constants.userTypeCustomer) {
-    //                     console.log('New Customer')
-    //                     navigation.navigate(constants.screenNewCustomer)
-    //                 } if (userData.type === constants.userTypeVendor) {
-    //                     console.log('New Vendor')
-    //                     navigation.navigate(constants.screenNewVendor)
-    //                 }
-    //             } else {
-    //                 navigation.navigate(constants.screenPushCartMap);
-    //             }
-    //             // ...
-    //         })
-    //         .catch((error) => {
-    //             // User couldn't sign in (bad verification code?)
-    //             // ...
-    //             console.log('wheres the user')
-    //         });
-    // }
-
     return (
         <View style={styles.container}>
-            {/* <FirebaseRecaptchaVerifierModal
-                ref={recaptchaVerifier}
-                firebaseConfig={firebaseConfig}
-                attemptInvisibleVerification={attemptInvisibleVerification}
-                androidHardwareAccelerationDisabled={true}
-                androidLayerType="software"
-            /> */}
-
             <ImageBackground
                 blurRadius={5}
                 source={require('../assets/welcome.jpg')}
@@ -119,29 +83,62 @@ const WelcomeScreen = ({ navigation }) => {
                 </View>
 
                 <View style={styles.form}>
-                    <UserSwitch />
+                    {
+                        inputValue == 0
+                        &&
+                        <>
+                            <Text style={styles.textdesc}>Choose your profile</Text>
+                            <UserSwitch />
+                            <ButtonPCP
+                                title='Next'
+                                color={constants.colorButton}
+                                textColor={constants.colorWhite}
+                                onPress={() => setInputValue(1)}
+                            />
 
-                    <UserInput
-                        placeholder='Phone Number'
-                        defaultValue={constants.defaultPhoneNumber}
-                        onChangeText={setPhoneNumber}
-                        buttonTitle='Get Verification Code'
-                        buttonColor={constants.colorButton}
-                        onButtonPress={verifyPhoneNumber}
-                        buttonDisabled={codeStatus == 0 ? false : true}
-                        accessibilityLabel="Click here to submit phone number"
-                    />
+                            {/* <TouchableOpacity style={styles.button} onPress={() => setInputValue(1)}>
+                                <Text style={styles.textbutton}>Next</Text>
+                            </TouchableOpacity> */}
+                        </>
+                    }
 
-                    <UserInput
-                        placeholder='Verification Code'
-                        defaultValue={constants.defaultVerificationCode}
-                        onChangeText={setVerificationCode}
-                        buttonTitle='Submit'
-                        buttonColor={constants.colorButton}
-                        onButtonPress={verifyCode}
-                        buttonDisabled={codeStatus == 0 ? true : false}
-                        accessibilityLabel="Click here to submit phone number"
-                    />
+                    {
+                        inputValue == 1
+                        &&
+                        <>
+                            <Text style={styles.textdesc}>Enter phone number</Text>
+                            <InputPCP
+                                placeholder='+91'
+                                defaultValue={constants.defaultPhoneNumber}
+                                onChangeText={setPhoneNumber}
+                            />
+                            <ButtonPCP
+                                title='Get Verification Code'
+                                color={constants.colorButton}
+                                textColor={constants.colorWhite}
+                                onPress={() => verifyPhoneNumber()}
+                            />
+                        </>
+                    }
+
+                    {
+                        inputValue == 2
+                        &&
+                        <>
+                            <Text style={styles.textdesc}>Enter verification code</Text>
+                            <InputPCP
+                                placeholder='Verification Code'
+                                defaultValue={constants.defaultVerificationCode}
+                                onChangeText={setPhoneNumber}
+                            />
+                            <ButtonPCP
+                                title='Sign In'
+                                color={constants.colorButton}
+                                textColor={constants.colorWhite}
+                                onPress={() => verifyCode()}
+                            />
+                        </>
+                    }
                 </View>
             </ImageBackground>
             {attemptInvisibleVerification && <FirebaseRecaptchaBanner />}
@@ -163,20 +160,32 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     logo: {
-        top: StatusBar.currentHeight + 40,
+        flex: 1,
+        top: 40,
     },
     form: {
+        // flex: 1,
         position: 'absolute',
-        bottom: 20,
-        width: '60%',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
     },
-    text: {
-        position: 'relative',
-        height: 40,
+    textdesc: {
+        alignSelf: 'center',
+        fontSize: 20,
     },
     button: {
-        position: 'relative',
-        height: 40,
+        borderRadius: 20,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        backgroundColor: constants.colorButton,
+    },
+    textbutton: {
+        color: constants.colorWhite,
     }
 })
 
