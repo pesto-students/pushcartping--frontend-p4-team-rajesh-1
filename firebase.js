@@ -15,7 +15,7 @@ const firebaseConfig = {
 };
 
 let app;
-console.log('firebase apps:', firebase.apps.length)
+// console.log('firebase apps:', firebase.apps.length)
 if (firebase.apps.length === 0) {
     app = firebase.initializeApp(firebaseConfig)
 } else {
@@ -51,15 +51,40 @@ export const verifySMSCode = (confirmationResult, verificationCode) => {
             .then((result) => {
                 // User signed in successfully.
                 console.log('Got user')
-                resolve({ responseCode: 1, msg: 'Got user', user: result.user, isNewUser: result.additionalUserInfo.isNewUser })
+                console.log(JSON.stringify(result))
+                resolve({ code: 1, msg: 'Got user', user: result.user })
             })
             .catch((error) => {
                 // User couldn't sign in (bad verification code?)
                 // ...
                 console.log('wheres the user')
-                reject({ responseCode: 0, msg: 'firebase.verifyCode failed' })
+                reject({ code: 0, msg: 'firebase.verifyCode failed' })
             });
     });
+}
+
+export const checkIfUserInDatabase = ({ userID }) => {
+    return new Promise((resolve, reject) => {
+        db.collection(constants.db_user_collection)
+            .doc(userID)
+            .get()
+            .then(documentSnapshot => {
+                // console.log(documentSnapshot);
+                console.log('User exists: ', documentSnapshot.exists);
+
+                if (documentSnapshot.exists) {
+                    resolve({ code: 1, msg: 'User exists' })
+                } else {
+                    reject({ code: 0, msg: 'User not found' })
+                }
+            })
+            .catch((error) => {
+                // User couldn't sign in (bad verification code?)
+                // ...
+                console.log('checkIfUserInDatabase error, uid:', userID)
+                reject({ code: 0, msg: `checkIfUserInDatabase, uid: ${userID}` })
+            });
+    })
 }
 
 export const addUserToDatabase = ({ userID, userName, userEmail, userPhotoURL }) => {
@@ -73,7 +98,7 @@ export const addUserToDatabase = ({ userID, userName, userEmail, userPhotoURL })
 
                 if (documentSnapshot.exists) {
                     console.log('User data: ', documentSnapshot.data());
-                    reject({ responseCode: 0, msg: 'User already exists' })
+                    reject({ code: 0, msg: 'User already exists' })
                 } else {
                     db.collection(constants.db_user_collection)
                         .doc(userID)
@@ -84,21 +109,19 @@ export const addUserToDatabase = ({ userID, userName, userEmail, userPhotoURL })
                         })
                         .then(() => {
                             console.log('User added!');
-                            reject({ responseCode: 1, msg: 'User added' })
+                            resolve({ code: 1, msg: 'User added' })
                         })
                         .catch((error) => {
                             // User couldn't sign in (bad verification code?)
                             // ...
                             console.log('couldnt insert new user')
-                            reject({ responseCode: 0, msg: 'couldnt insert new user' })
+                            reject({ code: 0, msg: 'couldnt insert new user' })
                         });
                 }
             })
             .catch((error) => {
-                // User couldn't sign in (bad verification code?)
-                // ...
-                console.log('no user with uid:', userID)
-                reject({ responseCode: 0, msg: `no user with uid: ${userID}` })
+                console.log('addUserToDatabase error, uid:', userID)
+                reject({ code: 0, msg: `addUserToDatabase error, uid: ${userID}` })
             });
     });
 }

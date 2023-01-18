@@ -4,7 +4,7 @@ export default {
     colorBackground: '#eeeeee',
     colorWhite: '#ffffff',
     colorBlack: '#000',
-    colorButton: '#841584',
+    colorButton: '#5808fb',
 
     screenHome: 'Home',
     screenPushCartMap: 'PushCartMap',
@@ -25,9 +25,10 @@ export default {
 
 
     // ONLY FOR TESTING, PLEASE RESET FOR PRODUCTION
-    defaultPhoneNumber: '+919999999999',
+    // defaultPhoneNumber: '+919999999999',
+    // defaultPhoneNumber: '+911111111111',
     // defaultPhoneNumber: '+919833242774',
-    defaultVerificationCode: '654321',
+    // defaultVerificationCode: '654321',
     userLocationLat: 13.019864771741265,
     userLocationLng: 80.2552468429313,
 

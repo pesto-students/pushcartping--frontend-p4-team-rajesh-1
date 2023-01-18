@@ -5,7 +5,7 @@ import SwitchSelector from 'react-native-switch-selector'
 import constants from '../config/constants';
 import { UserContext } from '../context/UserContext';
 
-const UserSwitch = () => {
+const UserSwitch = ({ containerStyle = {}, containerMargin = [0, 0, 0, 0] }) => {
     const { userData, setUserData } = useContext(UserContext);
 
     useEffect(() => {
@@ -13,7 +13,7 @@ const UserSwitch = () => {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <View style={containerStyle}>
             <SwitchSelector
                 initial={constants.userTypeCustomer}
                 onPress={value => setUserData(value)}
@@ -21,6 +21,8 @@ const UserSwitch = () => {
                 selectedColor={constants.colorWhite}
                 buttonColor={constants.colorButton}
                 borderColor={constants.colorBackground}
+                height={40}
+                borderRadius={15}
                 hasPadding
                 options={[
                     { label: "Customer", value: constants.userTypeCustomer }, //images.feminino = require('./path_to/assets/img/feminino.png')
@@ -34,14 +36,3 @@ const UserSwitch = () => {
 }
 
 export default UserSwitch
-
-const styles = StyleSheet.create({
-    container: {
-        // flex: 1,
-        marginVertical: 10,
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        width: '60%',
-    },
-})

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, TextInput, StatusBar, TouchableOpacity, Button } from 'react-native'
 import React, { useContext, useCallback, useState, useEffect } from 'react'
-import { addUserToDatabase, db } from '../../firebase';
+import { addUserToDatabase } from '../../firebase';
 // import firestore from '@react-native-firebase/firestore';
 import DocumentPicker, { types } from 'react-native-document-picker';
 

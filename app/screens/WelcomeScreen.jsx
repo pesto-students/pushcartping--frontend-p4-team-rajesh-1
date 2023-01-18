@@ -1,7 +1,8 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
-import { View, StyleSheet, ImageBackground, Text, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, ImageBackground, Alert, Image, Platform, KeyboardAvoidingView } from 'react-native'
 import { FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
-import { signInWithPhone, verifySMSCode } from '../../firebase';
+import { LinearGradient } from "expo-linear-gradient";
+import { signInWithPhone, verifySMSCode, checkIfUserInDatabase } from '../../firebase';
 
 import constants from '../config/constants'
 import { PCPLogo, UserSwitch, ButtonPCP, InputPCP } from '../components';
@@ -18,12 +19,23 @@ const WelcomeScreen = ({ navigation }) => {
     const [confirmationResult, setConfirmationResult] = useState(null);
     const [codeStatus, setCodeStatus] = useState(0);
 
+    const createAlert = (title, message) =>
+        Alert.alert(title, message, [
+            { text: 'OK', onPress: () => console.log('OK Pressed') },
+        ]);
 
     // Function to be called when requesting for a verification code
     const verifyPhoneNumber = async () => {
         try {
             console.log("Verify Phone: ", userData.type, 'phone:', phoneNumber)
-            signInWithPhone(phoneNumber)
+
+            if (!phoneNumber || phoneNumber.length != 10) {
+                console.log('phone alert time')
+                createAlert('Error:', 'Please enter valid phone number.')
+                return;
+            }
+
+            await signInWithPhone('+91' + phoneNumber)
                 .then((response) => {
                     console.log('signInWithPhone response:', Object.keys(response))
                     setConfirmationResult(response.confirmationResult);
@@ -39,16 +51,37 @@ const WelcomeScreen = ({ navigation }) => {
     };
 
     const verifyCode = async () => {
-        verifySMSCode(confirmationResult, verificationCode)
+        await verifySMSCode(confirmationResult, verificationCode)
             .then((response) => {
                 console.log('verifySMSCode response:', Object.keys(response))
+                console.log(Object.keys(response.user))
+                console.log(JSON.stringify(response.user))
                 setUser(response.user);
-                goToNextScreen(response.isNewUser)
+                // isUserInDatabase();
+                //goToNextScreen(response.isNewUser)
             })
             .catch((error) => {
                 console.log('verifySMSCode error:', error)
             });
     }
+
+    const isUserInDatabase = async () => {
+        console.log('isUserInDatabase user id: ', user.uid)
+        await checkIfUserInDatabase({ userID: user.uid })
+            .then((response) => {
+                console.log('isUserInDatabase response, ', response);
+                goToNextScreen(response.code ? false : true)
+            })
+            .catch((error) => {
+                console.log('isUserInDatabase error:', error);
+            });
+    }
+
+    useEffect(() => {
+        console.log('useeffect called, uid: ', user.uid)
+        console.log(JSON.stringify(user))
+        isUserInDatabase();
+    }, [user]);
 
     const goToNextScreen = (isNewUser) => {
         // For TESTING ONLY
@@ -71,34 +104,48 @@ const WelcomeScreen = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
             <ImageBackground
-                blurRadius={5}
+                // blurRadius={0}
                 source={require('../assets/welcome.jpg')}
                 resizeMode='cover'
                 style={styles.background}>
 
-                <View style={styles.logo}>
-                    <PCPLogo />
-                </View>
+                {/* <View style={styles.logo}> */}
+                {/* <PCPLogo /> */}
+                {/* <Image source={require('../assets/title.png')} style={styles.img} /> */}
+                {/* </View> */}
+
+                <Image
+                    source={require('../assets/title.png')}
+                    style={styles.img}
+                    resizeMode='cover'
+                />
 
                 <View style={styles.form}>
                     {
                         inputValue == 0
                         &&
                         <>
-                            <Text style={styles.textdesc}>Choose your profile</Text>
-                            <UserSwitch />
+                            <UserSwitch
+                                containerStyle={{
+                                    width: '60%',
+                                    marginVertical: 5,
+                                }}
+                            />
                             <ButtonPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    marginVertical: 5,
+                                }}
                                 title='Next'
                                 color={constants.colorButton}
                                 textColor={constants.colorWhite}
                                 onPress={() => setInputValue(1)}
                             />
-
-                            {/* <TouchableOpacity style={styles.button} onPress={() => setInputValue(1)}>
-                                <Text style={styles.textbutton}>Next</Text>
-                            </TouchableOpacity> */}
                         </>
                     }
 
@@ -106,14 +153,30 @@ const WelcomeScreen = ({ navigation }) => {
                         inputValue == 1
                         &&
                         <>
-                            <Text style={styles.textdesc}>Enter phone number</Text>
                             <InputPCP
-                                placeholder='+91'
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                placeholder='ENTER PHONE NUMBER'
                                 defaultValue={constants.defaultPhoneNumber}
                                 onChangeText={setPhoneNumber}
+                                icon={require('../assets/input_icons/phone.png')}
+                                iconStyle={{
+                                    position: 'absolute',
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginLeft: 10,
+                                }}
                             />
                             <ButtonPCP
-                                title='Get Verification Code'
+                                containerStyle={{
+                                    width: '60%',
+                                    marginVertical: 5,
+                                }}
+                                title='Get OTP'
                                 color={constants.colorButton}
                                 textColor={constants.colorWhite}
                                 onPress={() => verifyPhoneNumber()}
@@ -125,13 +188,29 @@ const WelcomeScreen = ({ navigation }) => {
                         inputValue == 2
                         &&
                         <>
-                            <Text style={styles.textdesc}>Enter verification code</Text>
                             <InputPCP
-                                placeholder='Verification Code'
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                placeholder='ENTER OTP'
                                 defaultValue={constants.defaultVerificationCode}
-                                onChangeText={setPhoneNumber}
+                                onChangeText={setVerificationCode}
+                                icon={require('../assets/input_icons/message.png')}
+                                iconStyle={{
+                                    position: 'absolute',
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginLeft: 10,
+                                }}
                             />
                             <ButtonPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    marginVertical: 5,
+                                }}
                                 title='Sign In'
                                 color={constants.colorButton}
                                 textColor={constants.colorWhite}
@@ -142,7 +221,7 @@ const WelcomeScreen = ({ navigation }) => {
                 </View>
             </ImageBackground>
             {attemptInvisibleVerification && <FirebaseRecaptchaBanner />}
-        </View>
+        </KeyboardAvoidingView>
     )
 }
 
@@ -159,9 +238,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 10,
     },
-    logo: {
-        flex: 1,
-        top: 40,
+    img: {
+        // flex: 5,
+        top: 60,
+        transform: [{ scale: 0.4 }],
+        // width: 1,
     },
     form: {
         // flex: 1,
@@ -177,6 +258,7 @@ const styles = StyleSheet.create({
     textdesc: {
         alignSelf: 'center',
         fontSize: 20,
+        color: constants.colorWhite,
     },
     button: {
         borderRadius: 20,

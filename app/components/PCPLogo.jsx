@@ -5,8 +5,8 @@ const PCPLogo = () => {
     return (
         <>
             <View style={styles.container}>
-                <Image source={require('../assets/icon.png')} style={styles.img} />
-                <Text style={styles.tagline}>pushcartping</Text>
+                <Image source={require('../assets/title.png')} style={styles.img} />
+                {/* <Text style={styles.tagline}>pushcartping</Text> */}
             </View>
         </>
     )
@@ -19,13 +19,14 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
+        width: '90%',
         alignItems: 'center'
     },
 
     img: {
         position: 'absolute',
-        width: 70,
-        height: 70,
+        // width: '70%',
+        // height: 70,
         alignItems: 'center'
     },
 

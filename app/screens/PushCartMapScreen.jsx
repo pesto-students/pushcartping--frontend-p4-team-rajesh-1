@@ -10,12 +10,14 @@ import constants from '../config/constants';
 const PushCartMapScreen = ({ navigation }) => {
     const { user, setUser } = useContext(UserContext);
     const { pushCartList, setPushCartList, selectedPushCart, setSelectedPushCart } = useContext(PushCartContext);
-    const [trigger, setTrigger] = useState(0);
+    const [trigger, setTrigger] = useState(-1);
 
     // console.log("Hello key", process.env.GOOGLE_MAPS_API_KEY)
 
     const scrollToItem = (index) => {
         console.log('call scrolltoitem in PushCartMapScreen, index:', index)
+        console.log('call scrolltoitem in PushCartMapScreen, trigger:', trigger)
+
         setTrigger(index);
     }
 

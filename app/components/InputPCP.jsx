@@ -1,18 +1,36 @@
-import { StyleSheet, TextInput, View } from 'react-native'
+import { StyleSheet, TextInput, View, Image } from 'react-native'
 import React from 'react'
 
-const InputPCP = ({ placeholder = 'Enter value', defaultValue = 'Some text', keyboardType = 'phone-pad', autoCompleteType = 'tel', onChangeText }) => {
+import constants from '../config/constants'
+
+const InputPCP = ({ containerStyle = {}, placeholder = 'Enter value', defaultValue, textColor = 'white', keyboardType = 'phone-pad', autoCompleteType = 'tel', icon = null, iconStyle = {}, onChangeText }) => {
     return (
-        <View>
+        <View style={containerStyle}>
             <TextInput
-                // style={styles.text}
+                style={{
+                    backgroundColor: constants.colorWhite,
+                    color: constants.colorBlack,
+                    paddingLeft: 40,
+                    paddingRight: 10,
+                    borderRadius: 15,
+                    height: '100%',
+                }}
                 placeholder={placeholder}
-                defaultValue={defaultValue}
+                defaultValue={defaultValue ? defaultValue : null}
                 onChangeText={onChangeText}
                 keyboardType={keyboardType}
                 autoCompleteType={autoCompleteType}
-                textAlign={'center'}
+            // textAlign={'center'}
             />
+            {icon
+                ?
+                <Image
+                    source={icon}
+                    style={iconStyle}
+                />
+                :
+                <></>
+            }
         </View>
     )
 }

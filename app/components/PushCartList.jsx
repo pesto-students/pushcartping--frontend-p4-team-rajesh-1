@@ -23,7 +23,14 @@ const PushCartList = ({ navigateToPushCart, trigger }) => {
 
     const log = (trigger) => {
         console.log("call from parent");
-        refFlatList.current?.scrollToIndex({ animated: true, index: trigger });
+
+        if (trigger < 0)
+            return;
+
+        if (trigger === 0)
+            refFlatList.current?.scrollToOffset({ animated: true, offset: trigger });
+        else
+            refFlatList.current?.scrollToIndex({ animated: true, index: trigger });
     };
 
     return (

@@ -30,6 +30,19 @@ export const PushCartContextProvider = ({ children }) => {
 const samplePushcarts = [
     {
         'id': 1,
+        'name': 'Murugan Idli Shop',
+        'imageURL': require('../assets/fordemo/muruganidli.jpg'),
+        'averageCost': 50,
+        'category': 'Food',
+        'short_desc': 'Famous for their finger-licking coconut chutney.',
+        'rating': '4.5',
+        'phone': '+919999999999',
+        'distance': 150,
+        'lat': 13.020338291639757,
+        'lng': 80.25426122032799
+    },
+    {
+        'id': 2,
         'name': 'Burger Man',
         'imageURL': require('../assets/fordemo/burgerman.jpg'),
         'averageCost': 150,
@@ -41,19 +54,6 @@ const samplePushcarts = [
         'lat': 13.02022746104633,
         'lng': 80.25496697446783
 
-    },
-    {
-        'id': 2,
-        'name': 'Murugan Idli Shop',
-        'imageURL': require('../assets/fordemo/muruganidli.jpg'),
-        'averageCost': 50,
-        'category': 'Food',
-        'short_desc': 'Famous for their finger-licking coconut chutney.',
-        'rating': '4.5',
-        'phone': '+919999999999',
-        'distance': 150,
-        'lat': 13.020338291639757,
-        'lng': 80.25426122032799
     },
     {
         'id': 3,
