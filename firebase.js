@@ -34,12 +34,12 @@ export const signInWithPhone = (phoneNumber) => {
                 // SMS sent. Prompt user to type the code from the message, then sign the
                 // user in with confirmationResult.confirm(code).
                 console.log('signed in thru phone');
-                resolve({ confirmationResult: CR, codeStatus: 1, responseCode: 1, msg: 'signed in thru phone' })
+                resolve({ confirmationResult: CR, codeStatus: 1, code: 1, msg: 'signed in thru phone' })
                 // ...
             }).catch((error) => {
                 // Error; SMS not sent
                 // ...
-                reject({ msg: 'firebase.signInWithPhone error', responseCode: 0 })
+                reject({ msg: 'firebase.signInWithPhone error', code: -1 })
             });
     });
 };
@@ -58,7 +58,7 @@ export const verifySMSCode = (confirmationResult, verificationCode) => {
                 // User couldn't sign in (bad verification code?)
                 // ...
                 console.log('wheres the user')
-                reject({ code: 0, msg: 'firebase.verifyCode failed' })
+                reject({ code: -1, msg: 'firebase.verifyCode failed' })
             });
     });
 }
@@ -75,19 +75,19 @@ export const checkIfUserInDatabase = ({ userID }) => {
                 if (documentSnapshot.exists) {
                     resolve({ code: 1, msg: 'User exists' })
                 } else {
-                    reject({ code: 0, msg: 'User not found' })
+                    resolve({ code: 0, msg: 'User not found' })
                 }
             })
             .catch((error) => {
                 // User couldn't sign in (bad verification code?)
                 // ...
                 console.log('checkIfUserInDatabase error, uid:', userID)
-                reject({ code: 0, msg: `checkIfUserInDatabase, uid: ${userID}` })
+                reject({ code: -1, msg: `checkIfUserInDatabase, uid: ${userID}` })
             });
     })
 }
 
-export const addUserToDatabase = ({ userID, userName, userEmail, userPhotoURL }) => {
+export const addUserToDatabase = ({ userID, userName = '', userEmail = '', userPhotoURL = '' }) => {
     return new Promise((resolve, reject) => {
         db.collection(constants.db_user_collection)
             .doc(userID)
@@ -121,7 +121,7 @@ export const addUserToDatabase = ({ userID, userName, userEmail, userPhotoURL })
             })
             .catch((error) => {
                 console.log('addUserToDatabase error, uid:', userID)
-                reject({ code: 0, msg: `addUserToDatabase error, uid: ${userID}` })
+                reject({ code: -1, msg: `addUserToDatabase error, uid: ${userID}` })
             });
     });
 }

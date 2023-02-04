@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native'
 import React from 'react'
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import call from 'react-native-phone-call';
 import * as SMS from 'expo-sms';
 
@@ -23,7 +22,7 @@ const PushCart = ({ cart }) => {
             // do your SMS stuff here
             const { result } = await SMS.sendSMSAsync(
                 [cart.phone],
-                'Sending a test message',
+                'Hi there, can we talk?',
             );
         } else {
             // misfortune... there's no SMS available on this device
@@ -37,17 +36,47 @@ const PushCart = ({ cart }) => {
                 <Image source={cart.imageURL} style={styles.image}></Image>
             </View>
             <View style={styles.desc}>
-                <Text style={{ color: 'white', fontSize: 12, backgroundColor: constants.mapPinColorList[cart.id], paddingHorizontal: 5, alignSelf: 'flex-start' }}>{cart.distance}m away</Text>
-                <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{cart.name}</Text>
-                <Text style={{ fontSize: 14 }}>{cart.averageCost > 0 ? "₹" + cart.averageCost : 'N/A'} | {cart.category}</Text>
-                <Text style={{ fontSize: 14 }}>{cart.short_desc}</Text>
-                <Text style={{ fontSize: 14, color: constants.colorWhite, backgroundColor: 'green', paddingHorizontal: 5, alignSelf: 'flex-start' }}>{cart.rating}</Text>
+                <View
+                    style={{
+                        flex: 1,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Text style={{ fontSize: 14, color: constants.colorWhite, backgroundColor: 'green', paddingHorizontal: 5 }}>{cart.rating}</Text>
+                    <Text style={{ color: 'purple', fontSize: 12, marginLeft: 5 }}>{cart.distance}m away</Text>
+                </View>
+
+                <View
+                    style={{
+                        flex: 1,
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                    }}
+                >
+                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{cart.name}</Text>
+                    <Text style={{ fontSize: 14 }}>{cart.category} | {cart.averageCost > 0 ? "₹" + cart.averageCost : 'N/A'}</Text>
+                </View>
+
+                <View
+                    style={{
+                        flex: 1,
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                    }}
+                >
+                    <Text style={{ fontSize: 14 }}>{cart.short_desc}</Text>
+                </View>
+
+                <TouchableOpacity onPress={sendAnSMS}>
+                    <Text style={styles.msgButton}>SEND MESSAGE</Text>
+                </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.callButton} onPress={makeACall}>
-                <Ionicons name="md-call-sharp" size={20} color="purple" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.msgButton} onPress={sendAnSMS}>
-                <Ionicons name="md-chatbox-sharp" size={20} color="purple" />
+            <TouchableOpacity onPress={makeACall}>
+                <Image
+                    style={styles.callButton}
+                    source={require('../assets/input_icons/phone.png')}
+                />
             </TouchableOpacity>
         </View>
     )
@@ -69,29 +98,26 @@ const styles = StyleSheet.create({
     },
     desc: {
         flex: 2,
-        justifyContent: 'space-around',
     },
     image: {
-        width: 110,
-        height: 110,
-        borderRadius: 10,
+        width: 120,
+        height: 120,
+        borderRadius: 20,
+        marginLeft: -5,
     },
     callButton: {
         position: 'absolute',
-        // backgroundColor: 'purple',
-        borderRadius: 20,
-        // padding: 10,
-        top: 10,
-        right: 40,
-        // alignSelf: 'flex-start'
+        width: 30,
+        height: 30,
+        top: 0,
+        right: 0,
     },
     msgButton: {
-        position: 'absolute',
-        // backgroundColor: 'purple',
-        borderRadius: 20,
-        // padding: 10,
-        top: 10,
-        right: 10,
-        // alignSelf: 'flex-start'
+        fontSize: 12,
+        borderWidth: 1,
+        borderRadius: 10,
+        marginTop: 5,
+        width: '50%',
+        textAlign: 'center',
     },
 })

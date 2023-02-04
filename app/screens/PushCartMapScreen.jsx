@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { StyleSheet, View, Text, StatusBar, TouchableOpacity, ScrollView, RefreshControl } from 'react-native'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { UserContext } from '../context/UserContext';
 import { PushCartContext } from '../context/PushCartContext';

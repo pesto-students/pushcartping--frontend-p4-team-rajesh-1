@@ -14,6 +14,7 @@
     "@react-native-firebase/app": "^16.5.0",
     "@react-native-firebase/auth": "^16.5.0",
     "@react-native-firebase/firestore": "^16.5.0",
+    "@react-navigation/bottom-tabs": "^6.5.3",
     "@react-navigation/native": "^6.1.2",
     "@react-navigation/native-stack": "^6.9.8",
     "babel-plugin-inline-dotenv": "^1.7.0",
@@ -21,6 +22,7 @@
     "expo-dev-client": "~2.0.1",
     "expo-file-system": "~15.1.1",
     "expo-firebase-recaptcha": "~2.3.1",
+    "expo-linear-gradient": "~12.0.1",
     "expo-location": "~15.0.1",
     "expo-media-library": "~15.0.0",
     "expo-sms": "~11.0.0",
@@ -43,8 +45,7 @@
     "react-native-switch-selector": "^2.3.0",
     "react-native-vector-icons": "^9.2.0",
     "react-native-web": "~0.18.9",
-    "react-native-webview": "11.23.1",
-    "expo-linear-gradient": "~12.0.1"
+    "react-native-webview": "11.23.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

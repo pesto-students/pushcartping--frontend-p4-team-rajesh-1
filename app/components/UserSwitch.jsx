@@ -8,15 +8,15 @@ import { UserContext } from '../context/UserContext';
 const UserSwitch = ({ containerStyle = {}, containerMargin = [0, 0, 0, 0] }) => {
     const { userData, setUserData } = useContext(UserContext);
 
-    useEffect(() => {
-        setUserData({ type: constants.userTypeCustomer })
-    }, []);
+    // useEffect(() => {
+    //     setUserData({ type: constants.userTypeCustomer })
+    // }, []);
 
     return (
         <View style={containerStyle}>
             <SwitchSelector
                 initial={constants.userTypeCustomer}
-                onPress={value => setUserData(value)}
+                onPress={value => setUserData({ type: value })}
                 textColor={constants.colorBlack}
                 selectedColor={constants.colorWhite}
                 buttonColor={constants.colorButton}

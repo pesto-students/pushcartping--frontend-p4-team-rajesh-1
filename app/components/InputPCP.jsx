@@ -3,12 +3,12 @@ import React from 'react'
 
 import constants from '../config/constants'
 
-const InputPCP = ({ containerStyle = {}, placeholder = 'Enter value', defaultValue, textColor = 'white', keyboardType = 'phone-pad', autoCompleteType = 'tel', icon = null, iconStyle = {}, onChangeText }) => {
+const InputPCP = ({ editable = true, containerStyle = {}, placeholder = 'Enter value', defaultValue, textColor = 'white', keyboardType = 'phone-pad', autoCompleteType = 'tel', icon = null, iconStyle = {}, onChangeText }) => {
     return (
         <View style={containerStyle}>
             <TextInput
                 style={{
-                    backgroundColor: constants.colorWhite,
+                    backgroundColor: editable ? constants.colorWhite : constants.colorBackground,
                     color: constants.colorBlack,
                     paddingLeft: 40,
                     paddingRight: 10,
@@ -20,6 +20,7 @@ const InputPCP = ({ containerStyle = {}, placeholder = 'Enter value', defaultVal
                 onChangeText={onChangeText}
                 keyboardType={keyboardType}
                 autoCompleteType={autoCompleteType}
+                editable={editable}
             // textAlign={'center'}
             />
             {icon

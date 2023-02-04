@@ -84,7 +84,8 @@ const MapDisplay = ({ scrollToItem }) => {
                             <Marker
                                 coordinate={{ latitude: item.lat, longitude: item.lng }}
                                 title={item.name}
-                                pinColor={constants.mapPinColorList[item.id]}
+                                // pinColor={constants.mapPinColorList[item.id]}
+                                pinColor={'purple'}
                                 key={index}
                                 onPress={(e) => {
                                     console.log('marker onPress:', index)

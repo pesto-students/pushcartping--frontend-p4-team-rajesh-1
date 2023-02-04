@@ -1,11 +1,10 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { View, StyleSheet, ImageBackground, Alert, Image, Platform, KeyboardAvoidingView } from 'react-native'
 import { FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
-import { LinearGradient } from "expo-linear-gradient";
-import { signInWithPhone, verifySMSCode, checkIfUserInDatabase } from '../../firebase';
 
+import { signInWithPhone, verifySMSCode, checkIfUserInDatabase, addUserToDatabase } from '../../firebase';
 import constants from '../config/constants'
-import { PCPLogo, UserSwitch, ButtonPCP, InputPCP } from '../components';
+import { UserSwitch, ButtonPCP, InputPCP } from '../components';
 import { UserContext } from '../context/UserContext';
 
 const attemptInvisibleVerification = true
@@ -16,6 +15,9 @@ const WelcomeScreen = ({ navigation }) => {
     const [inputValue, setInputValue] = useState(0);
     const [phoneNumber, setPhoneNumber] = useState(constants.defaultPhoneNumber);
     const [verificationCode, setVerificationCode] = useState(constants.defaultVerificationCode);
+    const [userName, setUserName] = useState('')
+    const [email, setEmail] = useState('')
+
     const [confirmationResult, setConfirmationResult] = useState(null);
     const [codeStatus, setCodeStatus] = useState(0);
 
@@ -70,7 +72,25 @@ const WelcomeScreen = ({ navigation }) => {
         await checkIfUserInDatabase({ userID: user.uid })
             .then((response) => {
                 console.log('isUserInDatabase response, ', response);
-                goToNextScreen(response.code ? false : true)
+                goToNextScreen(response.code === 0 ? false : true)
+            })
+            .catch((error) => {
+                console.log('isUserInDatabase error:', error);
+            });
+    }
+
+    const addUserToDB = async () => {
+        console.log('isUserInDatabase user id: ', user.uid)
+
+        if (!userName || userName.length === 0 || !email || email.length === 0) {
+            createAlert('Error:', 'Name and email cannot be empty.')
+            return;
+        }
+
+        await addUserToDatabase({ userID: user.uid, userName: userName, userEmail: email })
+            .then((response) => {
+                console.log('isUserInDatabase response, ', response);
+                goToNextScreen(response.code === 0 ? false : true)
             })
             .catch((error) => {
                 console.log('isUserInDatabase error:', error);
@@ -78,22 +98,26 @@ const WelcomeScreen = ({ navigation }) => {
     }
 
     useEffect(() => {
+        if (!user.uid) return
         console.log('useeffect called, uid: ', user.uid)
         console.log(JSON.stringify(user))
         isUserInDatabase();
     }, [user]);
 
     const goToNextScreen = (isNewUser) => {
+        console.log('goToNextScreen, isNewUser:', isNewUser)
+
         // For TESTING ONLY
         // navigation.navigate(constants.screenNewCustomer);
         // return;
 
-        if (isNewUser) {
+        if (!isNewUser) {
             // show profile screen
             console.log("show profile screen, userType:", userData.type)
             if (userData.type === constants.userTypeCustomer) {
                 console.log('New Customer')
-                navigation.navigate(constants.screenNewCustomer)
+                setInputValue(3);
+                // navigation.navigate(constants.screenNewCustomer)
             } if (userData.type === constants.userTypeVendor) {
                 console.log('New Vendor')
                 navigation.navigate(constants.screenNewVendor)
@@ -133,12 +157,14 @@ const WelcomeScreen = ({ navigation }) => {
                             <UserSwitch
                                 containerStyle={{
                                     width: '60%',
+                                    height: 40,
                                     marginVertical: 5,
                                 }}
                             />
                             <ButtonPCP
                                 containerStyle={{
                                     width: '60%',
+                                    height: 40,
                                     marginVertical: 5,
                                 }}
                                 title='Next'
@@ -174,10 +200,10 @@ const WelcomeScreen = ({ navigation }) => {
                             <ButtonPCP
                                 containerStyle={{
                                     width: '60%',
+                                    height: 40,
                                     marginVertical: 5,
                                 }}
-                                title='Get OTP'
-                                color={constants.colorButton}
+                                title='GET OTP'
                                 textColor={constants.colorWhite}
                                 onPress={() => verifyPhoneNumber()}
                             />
@@ -210,11 +236,67 @@ const WelcomeScreen = ({ navigation }) => {
                                 containerStyle={{
                                     width: '60%',
                                     marginVertical: 5,
+                                    height: 40,
                                 }}
-                                title='Sign In'
-                                color={constants.colorButton}
+                                title='SIGN IN'
                                 textColor={constants.colorWhite}
                                 onPress={() => verifyCode()}
+                            />
+                        </>
+                    }
+
+                    {
+                        inputValue == 3
+                        &&
+                        <>
+                            <InputPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                placeholder='YOUR FULL NAME'
+                                keyboardType='default'
+                                onChangeText={setUserName}
+                                icon={require('../assets/input_icons/user.png')}
+                                iconStyle={{
+                                    position: 'absolute',
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginLeft: 10,
+                                }}
+                            />
+
+                            <InputPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                placeholder='YOUR EMAIL ADDRESS'
+                                keyboardType='default'
+                                default='email-address'
+                                onChangeText={setEmail}
+                                icon={require('../assets/input_icons/email.png')}
+                                iconStyle={{
+                                    position: 'absolute',
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginLeft: 10,
+                                }}
+                            />
+
+                            <ButtonPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                title='REGISTER'
+                                textColor={constants.colorWhite}
+                                onPress={() => addUserToDB()}
                             />
                         </>
                     }
