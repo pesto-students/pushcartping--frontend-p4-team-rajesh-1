@@ -25,13 +25,15 @@ export default {
 
 
     // ONLY FOR TESTING, PLEASE RESET FOR PRODUCTION
-    // defaultPhoneNumber: '9999999999',
-    defaultPhoneNumber: '1111111111',
+    defaultPhoneNumber: '9999999999',
+    // defaultPhoneNumber: '1111111111',
     // defaultPhoneNumber: '+919833242774',
     defaultVerificationCode: '654321',
+    defaultUserName: 'Mihir Rego',
+    defaultUserEmail: 'mihirego@gmail.com',
     userLocationLat: 13.019864771741265,
     userLocationLng: 80.2552468429313,
 
-    db_user_collection: 'Users',
+    db_customer_collection: 'Customers',
     db_vendor_collection: 'Vendors',
 }
