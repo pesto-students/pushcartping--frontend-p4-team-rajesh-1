@@ -26,7 +26,7 @@ const UserSwitch = ({ containerStyle = {}, containerMargin = [0, 0, 0, 0] }) => 
                 hasPadding
                 options={[
                     { label: "Customer", value: constants.userTypeCustomer }, //images.feminino = require('./path_to/assets/img/feminino.png')
-                    { label: "Vendor", value: constants.userTypeVendor } //images.masculino = require('./path_to/assets/img/masculino.png')
+                    { label: "Vendor", value: constants.userTypeVendor }, //images.masculino = require('./path_to/assets/img/masculino.png')
                 ]}
                 testID="user-switch-selector"
                 accessibilityLabel="user-switch-selector"

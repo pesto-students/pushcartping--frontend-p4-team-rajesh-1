@@ -10,7 +10,7 @@ export default {
     screenPushCartMap: 'PushCartMap',
     screenPushCartDetails: 'PushCartDetails',
     screenNewVendor: 'NewVendor',
-    // screenNewCustomer: 'NewCustomer',
+    screenNewCustomer: 'RegisterNewCustomer',
 
     userTypeCustomer: 0,
     userTypeVendor: 1,
@@ -22,11 +22,9 @@ export default {
     mapPinColor: 'purple',
     mapPinColorList: ['red', 'blue', 'orange', 'turquoise', 'green', 'gold', 'wheat', 'linen', 'tan', 'tomato', 'aqua', 'teal', 'violet', 'purple', 'indigo', 'yellow', 'navy', 'plum'],
 
-
-
     // ONLY FOR TESTING, PLEASE RESET FOR PRODUCTION
-    defaultPhoneNumber: '9999999999',
-    // defaultPhoneNumber: '1111111111',
+    // defaultPhoneNumber: '9999999999',
+    defaultPhoneNumber: '1111111111',
     // defaultPhoneNumber: '+919833242774',
     defaultVerificationCode: '654321',
     defaultUserName: 'Mihir Rego',

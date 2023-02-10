@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider as PaperProvider } from 'react-native-paper';
 
-import { WelcomeScreen, PushCartMapScreen, NewVendorScreen, PushCartDetailsScreen } from './app/screens'
+import { NewVendorScreen, PushCartMapScreen, PushCartDetailsScreen, WelcomeScreen } from './app/screens'
 import { UserContextProvider } from './app/context/UserContext';
 import { PushCartContextProvider } from './app/context/PushCartContext';
 import constants from './app/config/constants';

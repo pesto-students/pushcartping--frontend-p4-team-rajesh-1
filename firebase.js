@@ -91,12 +91,12 @@ export const checkIfCustomerInDatabase = ({ userID }) => {
 
 export const addPhotoToStorage = ({ userID, filePath }) => {
     return new Promise((resolve, reject) => {
-        const fileName = 'dp_' + userID
-        const task = storage.ref(fileName).putFile(filePath);
+        const fileName = 'profile_pic'
+        const task = storage.ref(`/customers/${userID}/` + fileName).putFile(filePath);
 
         task.then(() => {
             console.log('Image uploaded to the bucket!');
-            storage.ref('/' + fileName)
+            storage.ref(`/customers/${userID}/` + fileName)
                 .getDownloadURL()
                 .then((url) => {
                     //from url you can fetched the uploaded image easily
@@ -151,6 +151,69 @@ export const addCustomerToDatabase = ({ userID, userName = '', userEmail = '', u
             .catch((error) => {
                 console.log('addCustomerToDatabase error, uid:', userID)
                 reject({ code: -1, msg: `addCustomerToDatabase error, uid: ${userID}` })
+            });
+    });
+}
+
+export const checkIfVendorInDatabase = ({ userID }) => {
+    return new Promise((resolve, reject) => {
+        db.collection(constants.db_vendor_collection)
+            .doc(userID)
+            .get()
+            .then(documentSnapshot => {
+                // console.log(documentSnapshot);
+                console.log('Vendor exists: ', documentSnapshot.exists);
+
+                if (documentSnapshot.exists) {
+                    resolve({ code: 1, msg: 'Vendor exists' })
+                } else {
+                    resolve({ code: 0, msg: 'Vendor not found' })
+                }
+            })
+            .catch((error) => {
+                // User couldn't sign in (bad verification code?)
+                // ...
+                console.log('checkIfVendorInDatabase error, uid:', userID)
+                reject({ code: -1, msg: `checkIfVendorInDatabase, uid: ${userID}` })
+            });
+    })
+}
+
+export const addVendorToDatabase = ({ userID, userName = '', userEmail = '', userPhotoURL = '' }) => {
+    return new Promise((resolve, reject) => {
+        db.collection(constants.db_vendor_collection)
+            .doc(userID)
+            .get()
+            .then(documentSnapshot => {
+                console.log(documentSnapshot);
+                console.log('Vendor exists: ', documentSnapshot.exists);
+
+                if (documentSnapshot.exists) {
+                    console.log('Vendor data: ', documentSnapshot.data());
+                    reject({ code: 0, msg: 'Vendor already exists' })
+                } else {
+                    db.collection(constants.db_vendor_collection)
+                        .doc(userID)
+                        .set({
+                            name: userName,
+                            email: userEmail,
+                            photoURL: userPhotoURL,
+                        })
+                        .then(() => {
+                            console.log('Vendor added!');
+                            resolve({ code: 1, msg: 'Vendor added' })
+                        })
+                        .catch((error) => {
+                            // User couldn't sign in (bad verification code?)
+                            // ...
+                            console.log('couldnt insert new Vendor')
+                            reject({ code: 0, msg: 'couldnt insert new Vendor' })
+                        });
+                }
+            })
+            .catch((error) => {
+                console.log('addVendorToDatabase error, uid:', userID)
+                reject({ code: -1, msg: `addVendorToDatabase error, uid: ${userID}` })
             });
     });
 }

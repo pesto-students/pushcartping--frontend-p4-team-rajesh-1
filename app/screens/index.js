@@ -1,6 +1,6 @@
-import WelcomeScreen from "./WelcomeScreen"
+import NewVendorScreen from "./NewVendorScreen"
 import PushCartDetailsScreen from "./PushCartDetailsScreen"
 import PushCartMapScreen from "./PushCartMapScreen"
-import NewVendorScreen from "./NewVendorScreen"
+import WelcomeScreen from "./WelcomeScreen"
 
-export { WelcomeScreen, PushCartDetailsScreen, PushCartMapScreen, NewVendorScreen }
+export { NewVendorScreen, PushCartDetailsScreen, PushCartMapScreen, WelcomeScreen }

@@ -1,9 +1,10 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
-import { View, StyleSheet, ImageBackground, Alert, Image, Platform, KeyboardAvoidingView } from 'react-native'
+import { View, StyleSheet, ImageBackground, Alert, Image, Platform, KeyboardAvoidingView, TouchableHighlight, ToastAndroid } from 'react-native'
 import { FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import { launchImageLibrary } from 'react-native-image-picker';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { signInWithPhone, verifySMSCode, checkIfCustomerInDatabase, addCustomerToDatabase, addPhotoToStorage } from '../../firebase';
+import { signInWithPhone, verifySMSCode, checkIfCustomerInDatabase, addCustomerToDatabase, addPhotoToStorage, addVendorToDatabase } from '../../firebase';
 import constants from '../config/constants'
 import { UserSwitch, ButtonPCP, InputPCP } from '../components';
 import { UserContext } from '../context/UserContext';
@@ -16,17 +17,26 @@ const WelcomeScreen = ({ navigation }) => {
     const [inputValue, setInputValue] = useState(0);
     const [phoneNumber, setPhoneNumber] = useState(constants.defaultPhoneNumber);
     const [verificationCode, setVerificationCode] = useState(constants.defaultVerificationCode);
-    const [userName, setUserName] = useState(constants.defaultUserName)
-    const [email, setEmail] = useState(constants.defaultUserEmail)
+    // const [userName, setUserName] = useState(constants.defaultUserName)
+    // const [email, setEmail] = useState(constants.defaultUserEmail)
     const [filePath, setFilePath] = useState('');
+    const [filePaths, setFilePaths] = useState([]);
 
     const [confirmationResult, setConfirmationResult] = useState(null);
     const [codeStatus, setCodeStatus] = useState(0);
 
-    const createAlert = (title, message) =>
-        Alert.alert(title, message, [
-            { text: 'OK', onPress: () => console.log('OK Pressed') },
-        ]);
+    // const createAlert = (title, message) =>
+    //     Alert.alert(title, message, [
+    //         { text: 'OK', onPress: () => console.log('OK Pressed') },
+    //     ]);
+
+    const createAlert = (message) => {
+        ToastAndroid.showWithGravity(
+            message,
+            ToastAndroid.SHORT,
+            ToastAndroid.CENTER,
+        );
+    };
 
     // Function to be called when requesting for a verification code
     const verifyPhoneNumber = async () => {
@@ -84,7 +94,7 @@ const WelcomeScreen = ({ navigation }) => {
     const addCustomerToDB = async () => {
         console.log('addCustomerToDB user id: ', user.uid)
 
-        if (!userName || userName.length === 0 || !email || email.length === 0) {
+        if (!userData.name || userData.name.length === 0 || !userData.email || userData.email.length === 0) {
             createAlert('Error:', 'Name and email cannot be empty.')
             return;
         }
@@ -94,6 +104,7 @@ const WelcomeScreen = ({ navigation }) => {
             .then((url) => {
                 console.log('url', url)
                 photoURL = url
+                setUserData(prevState => ({ ...prevState, photoURL: photoURL }))
             })
             .catch((error) => {
                 console.log('addCustomerToDB error:', error);
@@ -101,7 +112,7 @@ const WelcomeScreen = ({ navigation }) => {
 
         console.log('photoURL:', photoURL)
 
-        await addCustomerToDatabase({ userID: user.uid, userName: userName, userEmail: email, userPhotoURL: photoURL })
+        await addCustomerToDatabase({ userID: user.uid, userName: userData.name, userEmail: userData.email, userPhotoURL: photoURL })
             .then((response) => {
                 console.log('addCustomerToDB response, ', response);
                 goToNextScreen(response.code === 0 ? false : true)
@@ -111,16 +122,36 @@ const WelcomeScreen = ({ navigation }) => {
             });
     }
 
-    // useEffect(() => {
-    //     addCustomerToDatabase({ userID: user.uid, userName: userName, userEmail: email, userPhotoURL: photoURL })
-    //         .then((response) => {
-    //             console.log('addCustomerToDB response, ', response);
-    //             goToNextScreen(response.code === 0 ? false : true)
-    //         })
-    //         .catch((error) => {
-    //             console.log('addCustomerToDB error:', error);
-    //         });
-    // }, [photoURL])
+    const addVendorToDB = async () => {
+        console.log('addVendorToDB user id: ', user.uid)
+
+        if (!userData.name || userData.name.length === 0 || !userData.email || userData.email.length === 0) {
+            createAlert('Error:', 'Name and email cannot be empty.')
+            return;
+        }
+
+        // let photoURL = ''
+        // await addPhotoToStorage({ userID: user.uid, filePath: filePath })
+        //     .then((url) => {
+        //         console.log('url', url)
+        //         photoURL = url
+        //         setUserData(prevState => ({ ...prevState, photoURL: photoURL }))
+        //     })
+        //     .catch((error) => {
+        //         console.log('addCustomerToDB error:', error);
+        //     });
+
+        // console.log('photoURL:', photoURL)
+
+        await addVendorToDatabase({ userID: user.uid, userName: userData.name, userEmail: userData.email })
+            .then((response) => {
+                console.log('addVendorToDatabase response, ', response);
+                goToNextScreen(response.code === 0 ? false : true)
+            })
+            .catch((error) => {
+                console.log('addVendorToDatabase error:', error);
+            });
+    }
 
     useEffect(() => {
         if (!user.uid) return
@@ -129,14 +160,18 @@ const WelcomeScreen = ({ navigation }) => {
         isCustomerInDatabase();
     }, [user]);
 
-    const goToNextScreen = (isNewUser) => {
-        console.log('goToNextScreen, isNewUser:', isNewUser)
+    useEffect(() => {
+        console.log('checking userdata: ', userData)
+    }, [userData]);
+
+    const goToNextScreen = (isExistingUser) => {
+        console.log('goToNextScreen, isNewUser:', isExistingUser)
 
         // For TESTING ONLY
         // navigation.navigate(constants.screenNewCustomer);
         // return;
 
-        if (!isNewUser) {
+        if (!isExistingUser) {
             // show profile screen
             console.log("show profile screen, userType:", userData.type)
             if (userData.type === constants.userTypeCustomer) {
@@ -145,7 +180,8 @@ const WelcomeScreen = ({ navigation }) => {
                 // navigation.navigate(constants.screenNewCustomer)
             } if (userData.type === constants.userTypeVendor) {
                 console.log('New Vendor')
-                navigation.navigate(constants.screenNewVendor)
+                setInputValue(4);
+                // navigation.navigate(constants.screenNewVendor)
             }
         } else {
             navigation.navigate(constants.screenPushCartMap);
@@ -153,47 +189,72 @@ const WelcomeScreen = ({ navigation }) => {
     }
 
     const chooseFile = async (type) => {
-        if (filePath) {
-            setFilePath('')
+        if (filePath)
             return
-        }
 
         let options = {
             mediaType: type,
             maxWidth: 300,
-            maxHeight: 550,
+            maxHeight: 300,
             quality: 1,
         };
 
-        // const result = await launchImageLibrary(options);
-        // console.log('result:', result.assets[0])
+        const result = await launchImageLibrary(options);
+        console.log('result:', result.assets[0])
 
-        launchImageLibrary(options, (response) => {
-            console.log('Response = ', response);
+        // launchImageLibrary(options, (response) => {
+        //     console.log('Response = ', response);
 
-            if (response.didCancel) {
-                alert('User cancelled camera picker');
-                return;
-            } else if (response.errorCode == 'camera_unavailable') {
-                alert('Camera not available on device');
-                return;
-            } else if (response.errorCode == 'permission') {
-                alert('Permission not satisfied');
-                return;
-            } else if (response.errorCode == 'others') {
-                alert(response.errorMessage);
-                return;
-            }
-            console.log('base64 -> ', response.assets[0].base64);
-            console.log('uri -> ', response.assets[0].uri);
-            console.log('width -> ', response.assets[0].width);
-            console.log('height -> ', response.assets[0].height);
-            console.log('fileSize -> ', response.assets[0].fileSize);
-            console.log('type -> ', response.assets[0].type);
-            console.log('fileName -> ', response.assets[0].fileName);
-            setFilePath(response.assets[0].uri);
-        });
+        //     if (response.didCancel) {
+        //         alert('User cancelled camera picker');
+        //         return;
+        //     } else if (response.errorCode == 'camera_unavailable') {
+        //         alert('Camera not available on device');
+        //         return;
+        //     } else if (response.errorCode == 'permission') {
+        //         alert('Permission not satisfied');
+        //         return;
+        //     } else if (response.errorCode == 'others') {
+        //         alert(response.errorMessage);
+        //         return;
+        //     }
+        //     console.log('base64 -> ', response.assets[0].base64);
+        //     console.log('uri -> ', response.assets[0].uri);
+        //     console.log('width -> ', response.assets[0].width);
+        //     console.log('height -> ', response.assets[0].height);
+        //     console.log('fileSize -> ', response.assets[0].fileSize);
+        //     console.log('type -> ', response.assets[0].type);
+        //     console.log('fileName -> ', response.assets[0].fileName);
+        //     setFilePath(response.assets[0].uri);
+        // });
     };
+
+    const chooseFiles = async (type) => {
+        if (filePaths.length === 4) {
+            createAlert('No more images allowed!')
+            return
+        }
+
+
+        let options = {
+            mediaType: type,
+            maxWidth: 300,
+            maxHeight: 300,
+            quality: 1,
+        };
+
+        const result = await launchImageLibrary(options);
+        console.log('chooseFiles result:')
+        console.log(result)
+        setFilePaths(prevState => [...prevState, result.assets[0].uri])
+    };
+
+    const removePhotoAt = (index) => {
+        setFilePaths([
+            ...filePaths.slice(0, index),
+            ...filePaths.slice(index + 1, filePaths.length)
+        ]);
+    }
 
     return (
         <KeyboardAvoidingView
@@ -317,6 +378,16 @@ const WelcomeScreen = ({ navigation }) => {
                         inputValue == 3
                         &&
                         <>
+                            <View>
+                                <TouchableHighlight onPress={() => chooseFile('photo')}>
+                                    <Image
+                                        style={{ width: 50, height: 50 }}
+                                        source={filePath ? { uri: filePath, } : require('../assets/input_icons/user.png')}
+                                    />
+                                </TouchableHighlight>
+                                {filePath && <Icon style={{ position: 'absolute', right: -15, top: -15 }} name="close" size={20} color="#fff" onPress={() => setFilePath('')} />}
+                            </View>
+
                             <InputPCP
                                 containerStyle={{
                                     width: '60%',
@@ -325,7 +396,7 @@ const WelcomeScreen = ({ navigation }) => {
                                 }}
                                 placeholder='YOUR FULL NAME'
                                 keyboardType='default'
-                                onChangeText={setUserName}
+                                onChangeText={newText => setUserData(prevState => ({ ...prevState, name: newText }))}
                                 icon={require('../assets/input_icons/user.png')}
                                 iconStyle={{
                                     position: 'absolute',
@@ -345,7 +416,7 @@ const WelcomeScreen = ({ navigation }) => {
                                 placeholder='YOUR EMAIL ADDRESS'
                                 keyboardType='default'
                                 default='email-address'
-                                onChangeText={setEmail}
+                                onChangeText={newText => setUserData(prevState => ({ ...prevState, email: newText }))}
                                 icon={require('../assets/input_icons/email.png')}
                                 iconStyle={{
                                     position: 'absolute',
@@ -362,9 +433,69 @@ const WelcomeScreen = ({ navigation }) => {
                                     height: 40,
                                     marginVertical: 5,
                                 }}
-                                title={filePath ? 'Remove Avatar' : 'Choose Avatar'}
+                                title='REGISTER'
                                 textColor={constants.colorWhite}
-                                onPress={() => chooseFile('photo')}
+                                onPress={() => addCustomerToDB()}
+                            />
+                        </>
+                    }
+
+                    {
+                        inputValue == 4
+                        &&
+                        <>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Icon style={{ marginRight: 10 }} name="plus" size={50} color="#fff" onPress={() => chooseFiles('photo')} />
+
+                                {
+                                    filePaths.map((item, index) =>
+                                        <TouchableHighlight onPress={() => removePhotoAt(index)}>
+                                            <Image
+                                                style={{ width: 50, height: 50 }}
+                                                source={{ uri: item, }}
+                                            />
+                                        </TouchableHighlight>
+                                    )
+                                }
+                            </View>
+
+                            <InputPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                placeholder='YOUR FULL NAME'
+                                keyboardType='default'
+                                onChangeText={newText => setUserData(prevState => ({ ...prevState, name: newText }))}
+                                icon={require('../assets/input_icons/user.png')}
+                                iconStyle={{
+                                    position: 'absolute',
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginLeft: 10,
+                                }}
+                            />
+
+                            <InputPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                placeholder='YOUR EMAIL ADDRESS'
+                                keyboardType='default'
+                                default='email-address'
+                                onChangeText={newText => setUserData(prevState => ({ ...prevState, email: newText }))}
+                                icon={require('../assets/input_icons/email.png')}
+                                iconStyle={{
+                                    position: 'absolute',
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginLeft: 10,
+                                }}
                             />
 
                             <ButtonPCP
@@ -375,14 +506,14 @@ const WelcomeScreen = ({ navigation }) => {
                                 }}
                                 title='REGISTER'
                                 textColor={constants.colorWhite}
-                                onPress={() => addCustomerToDB()}
+                                onPress={() => addVendorToDB()}
                             />
                         </>
                     }
                 </View>
             </ImageBackground>
             {attemptInvisibleVerification && <FirebaseRecaptchaBanner />}
-        </KeyboardAvoidingView>
+        </KeyboardAvoidingView >
     )
 }
 
