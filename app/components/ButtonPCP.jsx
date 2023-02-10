@@ -2,7 +2,7 @@ import { View, TouchableOpacity, Text } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import React from 'react'
 
-const ButtonPCP = ({ containerStyle = {}, title = 'button', colorArray = ['#9929ea', '#5808fb'], textColor = 'white', onPress }) => {
+const ButtonPCP = ({ containerStyle = {}, title = 'button', colorArray = ['#9929ea', '#5808fb'], textColor = 'white', disabled = false, onPress }) => {
     return (
         <View style={containerStyle}>
             <LinearGradient
@@ -16,6 +16,7 @@ const ButtonPCP = ({ containerStyle = {}, title = 'button', colorArray = ['#9929
                 }}>
                 <TouchableOpacity
                     onPress={onPress}
+                    disabled={disabled}
                 >
                     <Text
                         style={{

@@ -1,8 +1,9 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { View, StyleSheet, ImageBackground, Alert, Image, Platform, KeyboardAvoidingView } from 'react-native'
 import { FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
+import { launchImageLibrary } from 'react-native-image-picker';
 
-import { signInWithPhone, verifySMSCode, checkIfUserInDatabase, addUserToDatabase } from '../../firebase';
+import { signInWithPhone, verifySMSCode, checkIfCustomerInDatabase, addCustomerToDatabase, addPhotoToStorage } from '../../firebase';
 import constants from '../config/constants'
 import { UserSwitch, ButtonPCP, InputPCP } from '../components';
 import { UserContext } from '../context/UserContext';
@@ -15,8 +16,9 @@ const WelcomeScreen = ({ navigation }) => {
     const [inputValue, setInputValue] = useState(0);
     const [phoneNumber, setPhoneNumber] = useState(constants.defaultPhoneNumber);
     const [verificationCode, setVerificationCode] = useState(constants.defaultVerificationCode);
-    const [userName, setUserName] = useState('')
-    const [email, setEmail] = useState('')
+    const [userName, setUserName] = useState(constants.defaultUserName)
+    const [email, setEmail] = useState(constants.defaultUserEmail)
+    const [filePath, setFilePath] = useState('');
 
     const [confirmationResult, setConfirmationResult] = useState(null);
     const [codeStatus, setCodeStatus] = useState(0);
@@ -67,41 +69,64 @@ const WelcomeScreen = ({ navigation }) => {
             });
     }
 
-    const isUserInDatabase = async () => {
-        console.log('isUserInDatabase user id: ', user.uid)
-        await checkIfUserInDatabase({ userID: user.uid })
+    const isCustomerInDatabase = async () => {
+        console.log('isCustomerInDatabase user id: ', user.uid)
+        await checkIfCustomerInDatabase({ userID: user.uid })
             .then((response) => {
-                console.log('isUserInDatabase response, ', response);
+                console.log('isCustomerInDatabase response, ', response);
                 goToNextScreen(response.code === 0 ? false : true)
             })
             .catch((error) => {
-                console.log('isUserInDatabase error:', error);
+                console.log('isCustomerInDatabase error:', error);
             });
     }
 
-    const addUserToDB = async () => {
-        console.log('isUserInDatabase user id: ', user.uid)
+    const addCustomerToDB = async () => {
+        console.log('addCustomerToDB user id: ', user.uid)
 
         if (!userName || userName.length === 0 || !email || email.length === 0) {
             createAlert('Error:', 'Name and email cannot be empty.')
             return;
         }
 
-        await addUserToDatabase({ userID: user.uid, userName: userName, userEmail: email })
+        let photoURL = ''
+        await addPhotoToStorage({ userID: user.uid, filePath: filePath })
+            .then((url) => {
+                console.log('url', url)
+                photoURL = url
+            })
+            .catch((error) => {
+                console.log('addCustomerToDB error:', error);
+            });
+
+        console.log('photoURL:', photoURL)
+
+        await addCustomerToDatabase({ userID: user.uid, userName: userName, userEmail: email, userPhotoURL: photoURL })
             .then((response) => {
-                console.log('isUserInDatabase response, ', response);
+                console.log('addCustomerToDB response, ', response);
                 goToNextScreen(response.code === 0 ? false : true)
             })
             .catch((error) => {
-                console.log('isUserInDatabase error:', error);
+                console.log('addCustomerToDB error:', error);
             });
     }
+
+    // useEffect(() => {
+    //     addCustomerToDatabase({ userID: user.uid, userName: userName, userEmail: email, userPhotoURL: photoURL })
+    //         .then((response) => {
+    //             console.log('addCustomerToDB response, ', response);
+    //             goToNextScreen(response.code === 0 ? false : true)
+    //         })
+    //         .catch((error) => {
+    //             console.log('addCustomerToDB error:', error);
+    //         });
+    // }, [photoURL])
 
     useEffect(() => {
         if (!user.uid) return
         console.log('useeffect called, uid: ', user.uid)
-        console.log(JSON.stringify(user))
-        isUserInDatabase();
+        // console.log(JSON.stringify(user))
+        isCustomerInDatabase();
     }, [user]);
 
     const goToNextScreen = (isNewUser) => {
@@ -126,6 +151,49 @@ const WelcomeScreen = ({ navigation }) => {
             navigation.navigate(constants.screenPushCartMap);
         }
     }
+
+    const chooseFile = async (type) => {
+        if (filePath) {
+            setFilePath('')
+            return
+        }
+
+        let options = {
+            mediaType: type,
+            maxWidth: 300,
+            maxHeight: 550,
+            quality: 1,
+        };
+
+        // const result = await launchImageLibrary(options);
+        // console.log('result:', result.assets[0])
+
+        launchImageLibrary(options, (response) => {
+            console.log('Response = ', response);
+
+            if (response.didCancel) {
+                alert('User cancelled camera picker');
+                return;
+            } else if (response.errorCode == 'camera_unavailable') {
+                alert('Camera not available on device');
+                return;
+            } else if (response.errorCode == 'permission') {
+                alert('Permission not satisfied');
+                return;
+            } else if (response.errorCode == 'others') {
+                alert(response.errorMessage);
+                return;
+            }
+            console.log('base64 -> ', response.assets[0].base64);
+            console.log('uri -> ', response.assets[0].uri);
+            console.log('width -> ', response.assets[0].width);
+            console.log('height -> ', response.assets[0].height);
+            console.log('fileSize -> ', response.assets[0].fileSize);
+            console.log('type -> ', response.assets[0].type);
+            console.log('fileName -> ', response.assets[0].fileName);
+            setFilePath(response.assets[0].uri);
+        });
+    };
 
     return (
         <KeyboardAvoidingView
@@ -294,9 +362,20 @@ const WelcomeScreen = ({ navigation }) => {
                                     height: 40,
                                     marginVertical: 5,
                                 }}
+                                title={filePath ? 'Remove Avatar' : 'Choose Avatar'}
+                                textColor={constants.colorWhite}
+                                onPress={() => chooseFile('photo')}
+                            />
+
+                            <ButtonPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
                                 title='REGISTER'
                                 textColor={constants.colorWhite}
-                                onPress={() => addUserToDB()}
+                                onPress={() => addCustomerToDB()}
                             />
                         </>
                     }

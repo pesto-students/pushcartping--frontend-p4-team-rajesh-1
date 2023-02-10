@@ -1,6 +1,7 @@
 import firebase from '@react-native-firebase/app';
 import '@react-native-firebase/auth';
 import '@react-native-firebase/firestore';
+import '@react-native-firebase/storage';
 
 import constants from './app/config/constants';
 
@@ -24,8 +25,9 @@ if (firebase.apps.length === 0) {
 
 const db = firebase.firestore();
 const auth = firebase.auth();
+const storage = firebase.storage();
 
-export { firebase, firebaseConfig, db, auth };
+// export { firebase, firebaseConfig, db, auth };
 
 export const signInWithPhone = (phoneNumber) => {
     return new Promise((resolve, reject) => {
@@ -63,44 +65,71 @@ export const verifySMSCode = (confirmationResult, verificationCode) => {
     });
 }
 
-export const checkIfUserInDatabase = ({ userID }) => {
+export const checkIfCustomerInDatabase = ({ userID }) => {
     return new Promise((resolve, reject) => {
-        db.collection(constants.db_user_collection)
+        db.collection(constants.db_customer_collection)
             .doc(userID)
             .get()
             .then(documentSnapshot => {
                 // console.log(documentSnapshot);
-                console.log('User exists: ', documentSnapshot.exists);
+                console.log('Customer exists: ', documentSnapshot.exists);
 
                 if (documentSnapshot.exists) {
-                    resolve({ code: 1, msg: 'User exists' })
+                    resolve({ code: 1, msg: 'Customer exists' })
                 } else {
-                    resolve({ code: 0, msg: 'User not found' })
+                    resolve({ code: 0, msg: 'Customer not found' })
                 }
             })
             .catch((error) => {
                 // User couldn't sign in (bad verification code?)
                 // ...
-                console.log('checkIfUserInDatabase error, uid:', userID)
-                reject({ code: -1, msg: `checkIfUserInDatabase, uid: ${userID}` })
+                console.log('checkIfCustomerInDatabase error, uid:', userID)
+                reject({ code: -1, msg: `checkIfCustomerInDatabase, uid: ${userID}` })
             });
     })
 }
 
-export const addUserToDatabase = ({ userID, userName = '', userEmail = '', userPhotoURL = '' }) => {
+export const addPhotoToStorage = ({ userID, filePath }) => {
     return new Promise((resolve, reject) => {
-        db.collection(constants.db_user_collection)
+        const fileName = 'dp_' + userID
+        const task = storage.ref(fileName).putFile(filePath);
+
+        task.then(() => {
+            console.log('Image uploaded to the bucket!');
+            storage.ref('/' + fileName)
+                .getDownloadURL()
+                .then((url) => {
+                    //from url you can fetched the uploaded image easily
+                    // this.setState({ profileImageUrl: url });
+                    console.log('url')
+                    resolve(url)
+                })
+                .catch((error) => {
+                    console.log('getting downloadURL of image error => ', error)
+                    reject()
+                });
+        }).catch((e) => {
+            console.log('uploading image error => ', e);
+            reject();
+        });
+    });
+}
+
+export const addCustomerToDatabase = ({ userID, userName = '', userEmail = '', userPhotoURL = '' }) => {
+    return new Promise((resolve, reject) => {
+        db.collection(constants.db_customer_collection)
             .doc(userID)
             .get()
             .then(documentSnapshot => {
                 console.log(documentSnapshot);
-                console.log('User exists: ', documentSnapshot.exists);
+                console.log('Customer exists: ', documentSnapshot.exists);
 
                 if (documentSnapshot.exists) {
                     console.log('User data: ', documentSnapshot.data());
-                    reject({ code: 0, msg: 'User already exists' })
+                    reject({ code: 0, msg: 'Customer already exists' })
                 } else {
-                    db.collection(constants.db_user_collection)
+                    console.log('userPhotoURL', userPhotoURL)
+                    db.collection(constants.db_customer_collection)
                         .doc(userID)
                         .set({
                             name: userName,
@@ -108,8 +137,8 @@ export const addUserToDatabase = ({ userID, userName = '', userEmail = '', userP
                             photoURL: userPhotoURL,
                         })
                         .then(() => {
-                            console.log('User added!');
-                            resolve({ code: 1, msg: 'User added' })
+                            console.log('Customer added!');
+                            resolve({ code: 1, msg: 'Customer added' })
                         })
                         .catch((error) => {
                             // User couldn't sign in (bad verification code?)
@@ -120,8 +149,8 @@ export const addUserToDatabase = ({ userID, userName = '', userEmail = '', userP
                 }
             })
             .catch((error) => {
-                console.log('addUserToDatabase error, uid:', userID)
-                reject({ code: -1, msg: `addUserToDatabase error, uid: ${userID}` })
+                console.log('addCustomerToDatabase error, uid:', userID)
+                reject({ code: -1, msg: `addCustomerToDatabase error, uid: ${userID}` })
             });
     });
 }
