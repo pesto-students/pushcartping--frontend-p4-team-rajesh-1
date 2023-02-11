@@ -34,11 +34,10 @@ export const UserContextProvider = ({ children }) => {
     //     }
     // }, []);
 
-    // useEffect(() => {
-    //     fetchData()
-    //         // make sure to catch any error
-    //         .catch(console.error);;
-    // }, []);
+    useEffect(() => {
+        console.log('userdata')
+        console.log(userData)
+    }, [userData]);
 
     return (
         <UserContext.Provider value={{ user: user, setUser: setUser, userData: userData, setUserData: setUserData }}>

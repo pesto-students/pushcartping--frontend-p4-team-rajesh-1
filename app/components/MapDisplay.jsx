@@ -9,8 +9,11 @@ import * as Location from 'expo-location';
 
 import constants from '../config/constants'
 import { PushCartContext } from '../context/PushCartContext';
+import { UserContext } from '../context/UserContext';
 
 const MapDisplay = ({ scrollToItem }) => {
+    const { user, setUser, userData, setUserData } = useContext(UserContext);
+
     const [location, setLocation] = useState(null);
     const { pushCartList, setPushCartList } = useContext(PushCartContext);
     const ref = useRef();
@@ -47,6 +50,7 @@ const MapDisplay = ({ scrollToItem }) => {
             let loc = await Location.getCurrentPositionAsync({});
 
             if (constants.userLocationLat && constants.userLocationLng) {
+                setUserData(prevState => ({ ...prevState, loc: { 'lat': constants.userLocationLat, 'lng': constants.userLocationLng } }))
                 setLocation({
                     latitude: constants.userLocationLat,
                     longitude: constants.userLocationLng,
@@ -56,6 +60,8 @@ const MapDisplay = ({ scrollToItem }) => {
             } else {
                 console.log('LOCATION:');
                 console.log(JSON.stringify(loc));
+
+                setUserData(prevState => ({ ...prevState, loc: { 'lat': loc.coords.latitude, 'lng': loc.coords.longitude } }))
 
                 setLocation({
                     latitude: loc.coords.latitude,
@@ -79,10 +85,10 @@ const MapDisplay = ({ scrollToItem }) => {
                 mapPadding={{ top: 40 }}
             >
                 {
-                    pushCartList.map(
+                    Object.values(pushCartList).map(
                         (item, index) =>
                             <Marker
-                                coordinate={{ latitude: item.lat, longitude: item.lng }}
+                                coordinate={{ latitude: item.location['latitude'], longitude: item.location['longitude'] }}
                                 title={item.name}
                                 // pinColor={constants.mapPinColorList[item.id]}
                                 pinColor={'purple'}

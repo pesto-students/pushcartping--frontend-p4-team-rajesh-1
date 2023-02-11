@@ -44,13 +44,13 @@ const WelcomeScreen = ({ navigation }) => {
         try {
             console.log("Verify Phone: ", userData.type, 'phone:', phoneNumber)
 
-            if (!phoneNumber || phoneNumber.length != 10) {
+            if (!phoneNumber) {
                 console.log('phone alert time')
                 createAlert('Error:', 'Please enter valid phone number.')
                 return;
             }
 
-            await signInWithPhone('+91' + phoneNumber)
+            await signInWithPhone(phoneNumber)
                 .then((response) => {
                     console.log('signInWithPhone response:', Object.keys(response))
                     setConfirmationResult(response.confirmationResult);
@@ -72,6 +72,7 @@ const WelcomeScreen = ({ navigation }) => {
                 console.log(Object.keys(response.user))
                 console.log(JSON.stringify(response.user))
                 setUser(response.user);
+                setUserData(prevState => ({ ...prevState, phone: '+91' + phoneNumber }))
                 // isUserInDatabase();
                 //goToNextScreen(response.isNewUser)
             })
@@ -124,7 +125,7 @@ const WelcomeScreen = ({ navigation }) => {
     }
 
     const addVendorToDB = async () => {
-        console.log('addVendorToDB user id: ', user.uid)
+        console.log('addVendorToDB user id:', user.uid)
 
         if (!userData.name || userData.name.length === 0 || !userData.email || userData.email.length === 0) {
             createAlert('Error:', 'Name and email cannot be empty.')
@@ -136,22 +137,23 @@ const WelcomeScreen = ({ navigation }) => {
             .then((urls) => {
                 console.log('urls', urls)
                 photoURLs = urls
-                // setUserData(prevState => ({ ...prevState, photoURL: photoURL }))
+                setUserData(prevState => ({ ...prevState, photoURLs: urls }))
             })
             .catch((error) => {
                 console.log('addPhotoToStorage error:', error);
             });
 
-        console.log('photoURLs:', photoURLs)
+        // console.log('photoURLs:', photoURLs)
 
-        await addVendorToDatabase({ userID: user.uid, userName: userData.name, userEmail: userData.email })
-            .then((response) => {
-                console.log('addVendorToDatabase response, ', response);
-                goToNextScreen(response.code === 0 ? false : true)
-            })
-            .catch((error) => {
-                console.log('addVendorToDatabase error:', error);
-            });
+        await addVendorToDatabase({
+            userID: user.uid, userName: userData.name, userEmail: userData.email, userPhotoURLs: photoURLs,
+            userCategory: userData.category, userTagline: userData.tagline, userDescription: userData.description
+        }).then((response) => {
+            console.log('addVendorToDatabase response, ', response);
+            goToNextScreen(response.code === 0 ? false : true)
+        }).catch((error) => {
+            console.log('addVendorToDatabase error:', error);
+        });
     }
 
     useEffect(() => {
@@ -161,9 +163,9 @@ const WelcomeScreen = ({ navigation }) => {
         isCustomerInDatabase();
     }, [user]);
 
-    useEffect(() => {
-        console.log('checking userdata: ', userData)
-    }, [userData]);
+    // useEffect(() => {
+    //     console.log('checking userdata: ', userData)
+    // }, [userData]);
 
     const goToNextScreen = (isExistingUser) => {
         console.log('goToNextScreen, isNewUser:', isExistingUser)
@@ -235,7 +237,6 @@ const WelcomeScreen = ({ navigation }) => {
             createAlert('No more images allowed!')
             return
         }
-
 
         let options = {
             mediaType: type,

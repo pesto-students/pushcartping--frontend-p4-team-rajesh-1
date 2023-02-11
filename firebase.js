@@ -27,8 +27,6 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 const storage = firebase.storage();
 
-// export { firebase, firebaseConfig, db, auth };
-
 export const signInWithPhone = (phoneNumber) => {
     return new Promise((resolve, reject) => {
         auth.signInWithPhoneNumber(phoneNumber)
@@ -179,7 +177,7 @@ export const checkIfVendorInDatabase = ({ userID }) => {
     })
 }
 
-export const addVendorPhotosToStorage = ({ userID, filePaths }) => {
+export const addVendorPhotosToStorage = ({ userID, filePaths = [] }) => {
     let downloadURLS = []
     console.log('addVendorPhotosToStorage urls:', filePaths)
 
@@ -187,36 +185,43 @@ export const addVendorPhotosToStorage = ({ userID, filePaths }) => {
         return new Promise((resolve, reject) => {
             const fileName = 'profile_pic_' + index;
             const task = storage.ref(`/vendors/${userID}/` + fileName).putFile(item);
+            // console.log('fileName: ', fileName, 'item:', item)
+            // console.log(task)
             task.then(() => {
-                console.log('Image uploaded to the bucket!');
-                storage.ref(`/vendors/${userID}/` + fileName)
-                    .getDownloadURL()
-                    .then((url) => {
-                        //from url you can fetched the uploaded image easily
-                        // this.setState({ profileImageUrl: url });
-                        console.log('url')
-                        downloadURLS.push(url)
-                        resolve()
-                    })
-                    .catch((error) => {
-                        console.log('getting downloadURL of image error => ', error)
-                        reject()
-                    });
-            }).catch((e) => {
-                console.log('uploading image error => ', e);
+                try {
+                    console.log('Image uploaded to the bucket!');
+                    storage.ref(`/vendors/${userID}/` + fileName)
+                        .getDownloadURL()
+                        .then((url) => {
+                            //from url you can fetched the uploaded image easily
+                            // this.setState({ profileImageUrl: url });
+                            console.log('url:', url)
+                            // downloadURLS.push(url)
+                            resolve(url)
+                        })
+                        .catch((error) => {
+                            console.log('getting downloadURL of image error => ', error)
+                            reject()
+                        });
+                } catch (error) {
+                    console.log('some error!')
+                }
+            }).catch((error) => {
+                console.log('uploading image error => ', error);
                 reject();
             });
         })
     })
 
-    Promise.all(promises).then(
-        () => console.log('addVendorPhotosToStorage() success')
-    ).catch(
-        () => console.log('addVendorPhotosToStorage() failure')
-    )
+    return Promise.all(promises)
+        .then((data) => {
+            console.log("GOT ALL URLS", data)
+            return data
+        })
+        .catch((error) => console.log('addVendorPhotosToStorage() failure'))
 }
 
-export const addVendorToDatabase = ({ userID, userName = '', userEmail = '', userPhotoURL = '' }) => {
+export const addVendorToDatabase = ({ userID, userName = '', userEmail = '', userPhotoURLs = [], userCategory = '', userTagline = '', userDescription = '' }) => {
     return new Promise((resolve, reject) => {
         db.collection(constants.db_vendor_collection)
             .doc(userID)
@@ -234,7 +239,10 @@ export const addVendorToDatabase = ({ userID, userName = '', userEmail = '', use
                         .set({
                             name: userName,
                             email: userEmail,
-                            photoURL: userPhotoURL,
+                            photoURL: userPhotoURLs,
+                            category: userCategory,
+                            tagline: userTagline,
+                            description: userDescription,
                         })
                         .then(() => {
                             console.log('Vendor added!');
@@ -253,4 +261,26 @@ export const addVendorToDatabase = ({ userID, userName = '', userEmail = '', use
                 reject({ code: -1, msg: `addVendorToDatabase error, uid: ${userID}` })
             });
     });
+}
+
+export const getVendorsFromDB = () => {
+    return new Promise((resolve, reject) => {
+        db.collection(constants.db_vendor_collection)
+            .get()
+            .then(querySnapshot => {
+                console.log('Total users: ', querySnapshot.size);
+
+                let pushcarts = {}
+                querySnapshot.forEach(documentSnapshot => {
+                    console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
+                    pushcarts[documentSnapshot.id] = documentSnapshot.data()
+                });
+
+                resolve(pushcarts);
+            })
+            .catch((error) => {
+                console.log('getVendorsFromDB error')
+                reject()
+            });
+    })
 }

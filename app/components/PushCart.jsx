@@ -1,14 +1,20 @@
 import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import call from 'react-native-phone-call';
 import * as SMS from 'expo-sms';
+import { getDistance, getPreciseDistance } from 'geolib';
 
 import constants from '../config/constants'
+import { UserContext } from '../context/UserContext';
 
 const PushCart = ({ cart }) => {
+    const { userData } = useContext(UserContext);
+    const [distance, setDistance] = useState(0)
+
+
     const makeACall = () => {
         const args = {
-            number: cart.phone, // String value with the number to call
+            number: cart.phone ? cart.phone : '+919999999999', // String value with the number to call
             prompt: false, // Optional boolean property. Determines if the user should be prompted prior to the call 
             skipCanOpen: true // Skip the canOpenURL check
         }
@@ -21,7 +27,7 @@ const PushCart = ({ cart }) => {
         if (isAvailable) {
             // do your SMS stuff here
             const { result } = await SMS.sendSMSAsync(
-                [cart.phone],
+                [cart.phone ? cart.phone : '+919999999999'],
                 'Hi there, can we talk?',
             );
         } else {
@@ -30,10 +36,27 @@ const PushCart = ({ cart }) => {
         }
     }
 
+    const getDistanceFromUser = () => {
+        if (!userData.loc) {
+            console.log('cannot getDistanceFromUser')
+            return
+        }
+        let dis = getDistance(
+            { latitude: userData.loc['lat'], longitude: userData.loc['lng'] },
+            { latitude: cart.location['latitude'], longitude: cart.location['longitude'] }
+        );
+        console.log('getDistanceFromUser: ', dis)
+        setDistance(dis)
+    }
+
+    useEffect(() => {
+        getDistanceFromUser()
+    }, [userData]);
+
     return (
         <View style={styles.container}>
             <View style={styles.icon}>
-                <Image source={cart.imageURL} style={styles.image}></Image>
+                <Image source={{ uri: cart.photoURL[0] }} style={styles.image}></Image>
             </View>
             <View style={styles.desc}>
                 <View
@@ -43,8 +66,8 @@ const PushCart = ({ cart }) => {
                         alignItems: 'center',
                     }}
                 >
-                    <Text style={{ fontSize: 14, color: constants.colorWhite, backgroundColor: 'green', paddingHorizontal: 5 }}>{cart.rating}</Text>
-                    <Text style={{ color: 'purple', fontSize: 12, marginLeft: 5 }}>{cart.distance}m away</Text>
+                    <Text style={{ fontSize: 14, color: constants.colorWhite, backgroundColor: 'green', paddingHorizontal: 5 }}>{cart.rating ? cart.rating : '0.0'}</Text>
+                    <Text style={{ color: 'purple', fontSize: 12, marginLeft: 5 }}>{distance}m away</Text>
                 </View>
 
                 <View
@@ -55,7 +78,7 @@ const PushCart = ({ cart }) => {
                     }}
                 >
                     <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{cart.name}</Text>
-                    <Text style={{ fontSize: 14 }}>{cart.category} | {cart.averageCost > 0 ? "₹" + cart.averageCost : 'N/A'}</Text>
+                    <Text style={{ fontSize: 14 }}>{cart.category} | {cart.averageCost ? cart.averageCost > 0 ? "₹" + cart.averageCost : 'N/A' : 'N/A'}</Text>
                 </View>
 
                 <View
@@ -65,7 +88,7 @@ const PushCart = ({ cart }) => {
                         alignItems: 'flex-start',
                     }}
                 >
-                    <Text style={{ fontSize: 14 }}>{cart.short_desc}</Text>
+                    <Text style={{ fontSize: 14 }}>{cart.description}</Text>
                 </View>
 
                 <TouchableOpacity onPress={sendAnSMS}>
@@ -78,7 +101,7 @@ const PushCart = ({ cart }) => {
                     source={require('../assets/input_icons/phone.png')}
                 />
             </TouchableOpacity>
-        </View>
+        </View >
     )
 }
 

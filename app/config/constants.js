@@ -23,8 +23,8 @@ export default {
     mapPinColorList: ['red', 'blue', 'orange', 'turquoise', 'green', 'gold', 'wheat', 'linen', 'tan', 'tomato', 'aqua', 'teal', 'violet', 'purple', 'indigo', 'yellow', 'navy', 'plum'],
 
     // ONLY FOR TESTING, PLEASE RESET FOR PRODUCTION
-    // defaultPhoneNumber: '9999999999',
-    defaultPhoneNumber: '1111111111',
+    defaultPhoneNumber: '+919999999999',
+    // defaultPhoneNumber: '+911111111111',
     // defaultPhoneNumber: '+919833242774',
     defaultVerificationCode: '654321',
     defaultUserName: 'Mihir Rego',
