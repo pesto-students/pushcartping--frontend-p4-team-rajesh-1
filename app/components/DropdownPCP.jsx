@@ -3,7 +3,16 @@ import React from 'react'
 
 import constants from '../config/constants'
 
-const InputPCP = ({ editable = true, multiline = false, numberOfLines = 1, containerStyle = {}, placeholder = 'Enter value', defaultValue, textColor = 'white', keyboardType = 'phone-pad', autoCompleteType = 'tel', icon = null, iconStyle = {}, onChangeText }) => {
+const InputPCP = ({
+    editable = true,
+    containerStyle = {},
+    placeholder = 'Enter value',
+    defaultValue, textColor = 'white',
+    keyboardType = 'phone-pad',
+    autoCompleteType = 'tel',
+    icon = null, iconStyle = {},
+    dropdownIcon = null, dropdownStyle = {},
+    onChangeText }) => {
     return (
         <View style={containerStyle}>
             <TextInput
@@ -21,8 +30,6 @@ const InputPCP = ({ editable = true, multiline = false, numberOfLines = 1, conta
                 keyboardType={keyboardType}
                 autoCompleteType={autoCompleteType}
                 editable={editable}
-                multiline={multiline}
-                numberOfLines={numberOfLines}
             // textAlign={'center'}
             />
             {icon
@@ -30,6 +37,16 @@ const InputPCP = ({ editable = true, multiline = false, numberOfLines = 1, conta
                 <Image
                     source={icon}
                     style={iconStyle}
+                />
+                :
+                <></>
+            }
+
+            {dropdownIcon
+                ?
+                <Image
+                    source={dropdownIcon}
+                    style={dropdownStyle}
                 />
                 :
                 <></>

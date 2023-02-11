@@ -3,10 +3,11 @@ import { View, StyleSheet, ImageBackground, Alert, Image, Platform, KeyboardAvoi
 import { FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { Dropdown } from 'react-native-element-dropdown';
 
-import { signInWithPhone, verifySMSCode, checkIfCustomerInDatabase, addCustomerToDatabase, addPhotoToStorage, addVendorToDatabase } from '../../firebase';
+import { signInWithPhone, verifySMSCode, checkIfCustomerInDatabase, addCustomerToDatabase, addPhotoToStorage, addVendorToDatabase, addVendorPhotosToStorage } from '../../firebase';
 import constants from '../config/constants'
-import { UserSwitch, ButtonPCP, InputPCP } from '../components';
+import { UserSwitch, ButtonPCP, InputPCP, DropdownPCP } from '../components';
 import { UserContext } from '../context/UserContext';
 
 const attemptInvisibleVerification = true
@@ -130,18 +131,18 @@ const WelcomeScreen = ({ navigation }) => {
             return;
         }
 
-        // let photoURL = ''
-        // await addPhotoToStorage({ userID: user.uid, filePath: filePath })
-        //     .then((url) => {
-        //         console.log('url', url)
-        //         photoURL = url
-        //         setUserData(prevState => ({ ...prevState, photoURL: photoURL }))
-        //     })
-        //     .catch((error) => {
-        //         console.log('addCustomerToDB error:', error);
-        //     });
+        let photoURLs = ''
+        await addVendorPhotosToStorage({ userID: user.uid, filePaths: filePaths })
+            .then((urls) => {
+                console.log('urls', urls)
+                photoURLs = urls
+                // setUserData(prevState => ({ ...prevState, photoURL: photoURL }))
+            })
+            .catch((error) => {
+                console.log('addPhotoToStorage error:', error);
+            });
 
-        // console.log('photoURL:', photoURL)
+        console.log('photoURLs:', photoURLs)
 
         await addVendorToDatabase({ userID: user.uid, userName: userData.name, userEmail: userData.email })
             .then((response) => {
@@ -243,10 +244,23 @@ const WelcomeScreen = ({ navigation }) => {
             quality: 1,
         };
 
-        const result = await launchImageLibrary(options);
-        console.log('chooseFiles result:')
-        console.log(result)
-        setFilePaths(prevState => [...prevState, result.assets[0].uri])
+        const response = await launchImageLibrary(options);
+        console.log('chooseFiles response:')
+        console.log(response)
+        if (response.didCancel) {
+            createAlert('User cancelled camera picker');
+            return;
+        } else if (response.errorCode == 'camera_unavailable') {
+            createAlert('Camera not available on device');
+            return;
+        } else if (response.errorCode == 'permission') {
+            createAlert('Permission not satisfied');
+            return;
+        } else if (response.errorCode == 'others') {
+            createAlert(response.errorMessage);
+            return;
+        }
+        setFilePaths(prevState => [...prevState, response.assets[0].uri])
     };
 
     const removePhotoAt = (index) => {
@@ -446,7 +460,6 @@ const WelcomeScreen = ({ navigation }) => {
                         <>
                             <View style={{ flexDirection: 'row' }}>
                                 <Icon style={{ marginRight: 10 }} name="plus" size={50} color="#fff" onPress={() => chooseFiles('photo')} />
-
                                 {
                                     filePaths.map((item, index) =>
                                         <TouchableHighlight onPress={() => removePhotoAt(index)}>
@@ -497,6 +510,94 @@ const WelcomeScreen = ({ navigation }) => {
                                     marginLeft: 10,
                                 }}
                             />
+
+                            <InputPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                placeholder='BUSINESS CATEGORY'
+                                keyboardType='default'
+                                onChangeText={newText => setUserData(prevState => ({ ...prevState, category: newText }))}
+                                icon={require('../assets/input_icons/email.png')}
+                                iconStyle={{
+                                    position: 'absolute',
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginLeft: 10,
+                                }}
+                            />
+
+                            <InputPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                placeholder='TAG LINE'
+                                keyboardType='default'
+                                onChangeText={newText => setUserData(prevState => ({ ...prevState, tagline: newText }))}
+                                icon={require('../assets/input_icons/email.png')}
+                                iconStyle={{
+                                    position: 'absolute',
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginLeft: 10,
+                                }}
+                            />
+
+                            <InputPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                placeholder='DESCRIPTION'
+                                keyboardType='default'
+                                onChangeText={newText => setUserData(prevState => ({ ...prevState, description: newText }))}
+                                icon={require('../assets/input_icons/email.png')}
+                                iconStyle={{
+                                    position: 'absolute',
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginLeft: 10,
+                                }}
+                            />
+
+                            {/* <DropdownPCP
+                                containerStyle={{
+                                    width: '60%',
+                                    height: 40,
+                                    marginVertical: 5,
+                                }}
+                                placeholder='BUSINESS CATEGORY'
+                                keyboardType='default'
+                                onChangeText={newText => setUserData(prevState => ({ ...prevState, category: newText }))}
+                                icon={require('../assets/input_icons/email.png')}
+                                iconStyle={{
+                                    position: 'absolute',
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginLeft: 10,
+                                }}
+
+                                dropdownIcon={require('../assets/input_icons/user.png')}
+                                dropdownStyle={{
+                                    position: 'absolute',
+                                    right: 0,
+                                    top: 0,
+                                    width: 20,
+                                    height: 20,
+                                    marginVertical: 10,
+                                    marginRight: 10,
+                                }}
+                                dropdownOnPress={true}
+                            /> */}
 
                             <ButtonPCP
                                 containerStyle={{

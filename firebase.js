@@ -179,6 +179,43 @@ export const checkIfVendorInDatabase = ({ userID }) => {
     })
 }
 
+export const addVendorPhotosToStorage = ({ userID, filePaths }) => {
+    let downloadURLS = []
+    console.log('addVendorPhotosToStorage urls:', filePaths)
+
+    const promises = filePaths.map((item, index) => {
+        return new Promise((resolve, reject) => {
+            const fileName = 'profile_pic_' + index;
+            const task = storage.ref(`/vendors/${userID}/` + fileName).putFile(item);
+            task.then(() => {
+                console.log('Image uploaded to the bucket!');
+                storage.ref(`/vendors/${userID}/` + fileName)
+                    .getDownloadURL()
+                    .then((url) => {
+                        //from url you can fetched the uploaded image easily
+                        // this.setState({ profileImageUrl: url });
+                        console.log('url')
+                        downloadURLS.push(url)
+                        resolve()
+                    })
+                    .catch((error) => {
+                        console.log('getting downloadURL of image error => ', error)
+                        reject()
+                    });
+            }).catch((e) => {
+                console.log('uploading image error => ', e);
+                reject();
+            });
+        })
+    })
+
+    Promise.all(promises).then(
+        () => console.log('addVendorPhotosToStorage() success')
+    ).catch(
+        () => console.log('addVendorPhotosToStorage() failure')
+    )
+}
+
 export const addVendorToDatabase = ({ userID, userName = '', userEmail = '', userPhotoURL = '' }) => {
     return new Promise((resolve, reject) => {
         db.collection(constants.db_vendor_collection)

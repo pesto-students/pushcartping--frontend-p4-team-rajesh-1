@@ -9165,6 +9165,11 @@ react-native-document-picker@^8.1.3:
   dependencies:
     invariant "^2.2.4"
 
+react-native-element-dropdown@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/react-native-element-dropdown/-/react-native-element-dropdown-2.6.0.tgz#558306e89a71fb9c56c53a271c37ff5d945bbbd9"
+  integrity sha512-6cOGAeME7CSqq8PgdNT68v+nt2vcowgXNu0uxcBmSB1iT5ArhQddb1Vsk0QIOkt8NjRpyD0LjSBo/HVTy5u+bQ==
+
 react-native-google-places-autocomplete@^2.5.1:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/react-native-google-places-autocomplete/-/react-native-google-places-autocomplete-2.5.1.tgz#93d5ac3e34e3e8f594aae5349f9e2d3e0b87484e"
