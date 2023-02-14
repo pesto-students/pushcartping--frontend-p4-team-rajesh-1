@@ -3,20 +3,17 @@ import React, { useContext, useEffect } from 'react'
 import SwitchSelector from 'react-native-switch-selector'
 
 import constants from '../config/constants';
-import { UserContext } from '../context/UserContext';
+// import { UserContext } from '../context/UserContext';
+import { addUserEntry } from '../context/rootSlice';
 
-const UserSwitch = ({ containerStyle = {}, containerMargin = [0, 0, 0, 0] }) => {
-    const { userData, setUserData } = useContext(UserContext);
-
-    // useEffect(() => {
-    //     setUserData({ type: constants.userTypeCustomer })
-    // }, []);
+const UserSwitch = ({ containerStyle = {}, containerMargin = [0, 0, 0, 0], callback }) => {
+    // const { userData, setUserData } = useContext(UserContext);
 
     return (
         <View style={containerStyle}>
             <SwitchSelector
                 initial={constants.userTypeCustomer}
-                onPress={value => setUserData({ type: value })}
+                onPress={value => callback(value)}
                 textColor={constants.colorBlack}
                 selectedColor={constants.colorWhite}
                 buttonColor={constants.colorButton}

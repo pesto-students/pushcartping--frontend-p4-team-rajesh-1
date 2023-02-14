@@ -11,6 +11,7 @@ export default {
     screenPushCartDetails: 'PushCartDetails',
     screenNewVendor: 'NewVendor',
     screenNewCustomer: 'RegisterNewCustomer',
+    screenVendorProfile: 'VendorProfile',
 
     userTypeCustomer: 0,
     userTypeVendor: 1,
@@ -24,6 +25,7 @@ export default {
 
     // ONLY FOR TESTING, PLEASE RESET FOR PRODUCTION
     defaultPhoneNumber: '+919999999999',
+    // defaultPhoneNumber: '+12222222222',
     // defaultPhoneNumber: '+911111111111',
     // defaultPhoneNumber: '+919833242774',
     defaultVerificationCode: '654321',

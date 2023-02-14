@@ -64,6 +64,7 @@ export const verifySMSCode = (confirmationResult, verificationCode) => {
 }
 
 export const checkIfCustomerInDatabase = ({ userID }) => {
+    console.log('checkIfCustomerInDatabase uid:', userID)
     return new Promise((resolve, reject) => {
         db.collection(constants.db_customer_collection)
             .doc(userID)
@@ -73,7 +74,7 @@ export const checkIfCustomerInDatabase = ({ userID }) => {
                 console.log('Customer exists: ', documentSnapshot.exists);
 
                 if (documentSnapshot.exists) {
-                    resolve({ code: 1, msg: 'Customer exists' })
+                    resolve({ code: 1, msg: 'Customer exists', data: documentSnapshot.data() })
                 } else {
                     resolve({ code: 0, msg: 'Customer not found' })
                 }
@@ -153,17 +154,17 @@ export const addCustomerToDatabase = ({ userID, userName = '', userEmail = '', u
     });
 }
 
-export const checkIfVendorInDatabase = ({ userID }) => {
+export const checkIfVendorInDatabase = async ({ userID }) => {
     return new Promise((resolve, reject) => {
         db.collection(constants.db_vendor_collection)
             .doc(userID)
             .get()
             .then(documentSnapshot => {
                 // console.log(documentSnapshot);
-                console.log('Vendor exists: ', documentSnapshot.exists);
+                // console.log('Vendor exists: ', documentSnapshot.exists);
 
                 if (documentSnapshot.exists) {
-                    resolve({ code: 1, msg: 'Vendor exists' })
+                    resolve({ code: 1, msg: 'Vendor exists', data: documentSnapshot.data() })
                 } else {
                     resolve({ code: 0, msg: 'Vendor not found' })
                 }
@@ -171,15 +172,15 @@ export const checkIfVendorInDatabase = ({ userID }) => {
             .catch((error) => {
                 // User couldn't sign in (bad verification code?)
                 // ...
-                console.log('checkIfVendorInDatabase error, uid:', userID)
+                // console.log('checkIfVendorInDatabase error, uid:', userID)
                 reject({ code: -1, msg: `checkIfVendorInDatabase, uid: ${userID}` })
             });
     })
 }
 
-export const addVendorPhotosToStorage = ({ userID, filePaths = [] }) => {
+export const addVendorPhotosToStorage = async ({ userID, filePaths = [] }) => {
     let downloadURLS = []
-    console.log('addVendorPhotosToStorage urls:', filePaths)
+    // console.log('addVendorPhotosToStorage urls:', filePaths)
 
     const promises = filePaths.map((item, index) => {
         return new Promise((resolve, reject) => {
@@ -200,14 +201,14 @@ export const addVendorPhotosToStorage = ({ userID, filePaths = [] }) => {
                             resolve(url)
                         })
                         .catch((error) => {
-                            console.log('getting downloadURL of image error => ', error)
+                            // console.log('getting downloadURL of image error => ', error)
                             reject()
                         });
                 } catch (error) {
-                    console.log('some error!')
+                    // console.log('some error!')
                 }
             }).catch((error) => {
-                console.log('uploading image error => ', error);
+                // console.log('uploading image error => ', error);
                 reject();
             });
         })
@@ -215,23 +216,23 @@ export const addVendorPhotosToStorage = ({ userID, filePaths = [] }) => {
 
     return Promise.all(promises)
         .then((data) => {
-            console.log("GOT ALL URLS", data)
+            // console.log("GOT ALL URLS", data)
             return data
         })
         .catch((error) => console.log('addVendorPhotosToStorage() failure'))
 }
 
-export const addVendorToDatabase = ({ userID, userName = '', userEmail = '', userPhotoURLs = [], userCategory = '', userTagline = '', userDescription = '' }) => {
+export const addVendorToDatabase = async ({ userID, userName = '', userEmail = '', userPhotoURLs = [], userCategory = '', userTagline = '', userDescription = '' }) => {
     return new Promise((resolve, reject) => {
         db.collection(constants.db_vendor_collection)
             .doc(userID)
             .get()
             .then(documentSnapshot => {
                 console.log(documentSnapshot);
-                console.log('Vendor exists: ', documentSnapshot.exists);
+                // console.log('Vendor exists: ', documentSnapshot.exists);
 
                 if (documentSnapshot.exists) {
-                    console.log('Vendor data: ', documentSnapshot.data());
+                    // console.log('Vendor data: ', documentSnapshot.data());
                     reject({ code: 0, msg: 'Vendor already exists' })
                 } else {
                     db.collection(constants.db_vendor_collection)
@@ -245,19 +246,19 @@ export const addVendorToDatabase = ({ userID, userName = '', userEmail = '', use
                             description: userDescription,
                         })
                         .then(() => {
-                            console.log('Vendor added!');
+                            // console.log('Vendor added!');
                             resolve({ code: 1, msg: 'Vendor added' })
                         })
                         .catch((error) => {
                             // User couldn't sign in (bad verification code?)
                             // ...
-                            console.log('couldnt insert new Vendor')
+                            // console.log('couldnt insert new Vendor')
                             reject({ code: 0, msg: 'couldnt insert new Vendor' })
                         });
                 }
             })
             .catch((error) => {
-                console.log('addVendorToDatabase error, uid:', userID)
+                // console.log('addVendorToDatabase error, uid:', userID)
                 reject({ code: -1, msg: `addVendorToDatabase error, uid: ${userID}` })
             });
     });

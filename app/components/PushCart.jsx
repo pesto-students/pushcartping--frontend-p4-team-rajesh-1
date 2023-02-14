@@ -4,11 +4,14 @@ import call from 'react-native-phone-call';
 import * as SMS from 'expo-sms';
 import { getDistance, getPreciseDistance } from 'geolib';
 
+import { useSelector, useDispatch } from 'react-redux'
+
 import constants from '../config/constants'
-import { UserContext } from '../context/UserContext';
+// import { UserContext } from '../context/UserContext';
 
 const PushCart = ({ cart }) => {
-    const { userData } = useContext(UserContext);
+    // const { userData } = useContext(UserContext);
+    const userSlice = useSelector((state) => state.root.user)
     const [distance, setDistance] = useState(0)
 
 
@@ -37,13 +40,13 @@ const PushCart = ({ cart }) => {
     }
 
     const getDistanceFromUser = () => {
-        if (!userData.loc) {
+        if (!userSlice.latitude) {
             console.log('cannot getDistanceFromUser')
             return
         }
         let dis = getDistance(
-            { latitude: userData.loc['lat'], longitude: userData.loc['lng'] },
-            { latitude: cart.location['latitude'], longitude: cart.location['longitude'] }
+            { latitude: userSlice.latitude, longitude: userSlice.longitude },
+            { latitude: cart.latitude, longitude: cart.longitude }
         );
         console.log('getDistanceFromUser: ', dis)
         setDistance(dis)
@@ -51,7 +54,7 @@ const PushCart = ({ cart }) => {
 
     useEffect(() => {
         getDistanceFromUser()
-    }, [userData]);
+    }, [userSlice.latitude, userSlice.longitude]);
 
     return (
         <View style={styles.container}>

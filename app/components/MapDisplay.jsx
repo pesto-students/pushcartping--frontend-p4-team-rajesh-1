@@ -3,20 +3,129 @@ import React, { useState, useContext, useEffect, useRef } from 'react'
 import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Geolocation from '@react-native-community/geolocation';
 
 import * as Location from 'expo-location';
 
 import constants from '../config/constants'
 import { PushCartContext } from '../context/PushCartContext';
-import { UserContext } from '../context/UserContext';
+import { useDispatch } from 'react-redux'
+import { addUserEntry } from '../context/rootSlice';
+
+Geolocation.setRNConfiguration({
+    skipPermissionRequests: false,
+    authorizationLevel: 'whenInUse',
+    locationProvider: 'auto',
+});
 
 const MapDisplay = ({ scrollToItem }) => {
-    const { user, setUser, userData, setUserData } = useContext(UserContext);
+    // const { user, setUser, userData, setUserData } = useContext(UserContext);
+    const dispatch = useDispatch()
 
     const [location, setLocation] = useState(null);
     const { pushCartList, setPushCartList } = useContext(PushCartContext);
     const ref = useRef();
+
+    // const watchID = Geolocation.watchPosition()
+    // console.log('watchID:', watchID)
+
+    const getCurrentPosition = () => {
+
+        Geolocation.getCurrentPosition(
+            (position) => {
+                console.log('success')
+                // position: {
+                //     coords: {
+                //         latitude: number;
+                //         longitude: number;
+                //         altitude: number | null;
+                //         accuracy: number;
+                //         altitudeAccuracy: number | null;
+                //         heading: number | null;
+                //         speed: number | null;
+                //     };
+                //     timestamp: number;
+                // }
+            },
+            (error) => {
+                console.log('error', error)
+                // error: {
+                //     code: number;
+                //     message: string;
+                //     PERMISSION_DENIED: number;
+                //     POSITION_UNAVAILABLE: number;
+                //     TIMEOUT: number;
+                // }
+            }
+        )
+    };
+
+    let watchID;
+    const subscribeLocationLocation = () => {
+        console.log("subscribeLocationLocation() called")
+        watchID = Geolocation.watchPosition(
+            (position) => {
+                //Will give you the location on location change
+
+                // setLocationStatus('You are Here');
+                console.log('position:', position);
+
+                //getting the Longitude from the location json        
+                const currentLongitude = JSON.stringify(position.coords.longitude);
+
+                //getting the Latitude from the location json
+                const currentLatitude = JSON.stringify(position.coords.latitude);
+
+                //Setting Longitude state
+                // setCurrentLongitude(currentLongitude);
+
+                //Setting Latitude state
+                // setCurrentLatitude(currentLatitude);
+            },
+            (error) => {
+                setLocationStatus(error.message);
+            },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 1000
+            }
+        );
+    };
+
+    // const watchID = Geolocation.watchPosition(
+    //     success: (
+    //         position: {
+    //             coords: {
+    //                 latitude: number;
+    //                 longitude: number;
+    //                 altitude: number | null;
+    //                 accuracy: number;
+    //                 altitudeAccuracy: number | null;
+    //                 heading: number | null;
+    //                 speed: number | null;
+    //             };
+    //             timestamp: number;
+    //         }
+    //     ) => void,
+    //     error ?: (
+    //         error: {
+    //             code: number;
+    //             message: string;
+    //             PERMISSION_DENIED: number;
+    //             POSITION_UNAVAILABLE: number;
+    //             TIMEOUT: number;
+    //         }
+    //     ) => void,
+    //     options ?: {
+    //         interval?: number;
+    //         fastestInterval?: number;
+    //         timeout?: number;
+    //         maximumAge?: number;
+    //         enableHighAccuracy?: boolean;
+    //         distanceFilter?: number;
+    //         useSignificantChanges?: boolean;
+    //     }
+    // )
 
     const clearSearch = () => {
         ref.current?.clear();
@@ -41,16 +150,21 @@ const MapDisplay = ({ scrollToItem }) => {
 
     useEffect(() => {
         (async () => {
+            console.log('trying to get locs')
+
+            subscribeLocationLocation()
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
                 setErrorMsg('Permission to access location was denied');
+                console.log('trying to get locs error 1')
                 return;
             }
-
+            console.log('trying to get locs1')
             let loc = await Location.getCurrentPositionAsync({});
-
+            console.log('trying to get locs2')
             if (constants.userLocationLat && constants.userLocationLng) {
-                setUserData(prevState => ({ ...prevState, loc: { 'lat': constants.userLocationLat, 'lng': constants.userLocationLng } }))
+                // setUserData(prevState => ({ ...prevState, loc: { 'lat': constants.userLocationLat, 'lng': constants.userLocationLng } }))
+                dispatch(addUserEntry({ 'latitude': constants.userLocationLat, 'longitude': constants.userLocationLng }))
                 setLocation({
                     latitude: constants.userLocationLat,
                     longitude: constants.userLocationLng,
@@ -61,8 +175,8 @@ const MapDisplay = ({ scrollToItem }) => {
                 console.log('LOCATION:');
                 console.log(JSON.stringify(loc));
 
-                setUserData(prevState => ({ ...prevState, loc: { 'lat': loc.coords.latitude, 'lng': loc.coords.longitude } }))
-
+                // setUserData(prevState => ({ ...prevState, loc: { 'lat': loc.coords.latitude, 'lng': loc.coords.longitude } }))
+                dispatch(addUserEntry({ 'latitude': loc.coords.latitude, 'longitude': loc.coords.longitude }))
                 setLocation({
                     latitude: loc.coords.latitude,
                     longitude: loc.coords.longitude,
@@ -88,7 +202,7 @@ const MapDisplay = ({ scrollToItem }) => {
                     Object.values(pushCartList).map(
                         (item, index) =>
                             <Marker
-                                coordinate={{ latitude: item.location['latitude'], longitude: item.location['longitude'] }}
+                                coordinate={{ latitude: item.latitude, longitude: item.longitude }}
                                 title={item.name}
                                 // pinColor={constants.mapPinColorList[item.id]}
                                 pinColor={'purple'}

@@ -53,17 +53,17 @@ const PushCartList = ({ navigateToPushCart, trigger }) => {
             refFlatList.current?.scrollToIndex({ animated: true, index: trigger });
     };
 
-    const tempCheck = () => {
+    const refreshCarts = () => {
         console.log('pressed: ', pushCartList)
         Object.values(pushCartList).map((item, index) => {
             console.log('index:', index)
-            console.log('item:', typeof item.location['latitude'])
+            console.log('item:', typeof item.latitude)
         })
     }
 
     return (
         <>
-            <TouchableOpacity onPress={() => tempCheck()} style={styles.header}>
+            <TouchableOpacity onPress={() => refreshCarts()} style={styles.header}>
                 <Text style={styles.header_text}>{pushCartList.length} Push Carts <Text style={{ fontWeight: 'normal' }}>detected near you</Text></Text>
                 <Ionicons style={styles.header_filter} name="refresh-sharp" size={30} color="black" />
             </TouchableOpacity>
@@ -118,6 +118,6 @@ const styles = StyleSheet.create({
     },
     carts: {
         paddingHorizontal: 10,
-        marginBottom: 30,
+        marginBottom: 10,
     },
 })

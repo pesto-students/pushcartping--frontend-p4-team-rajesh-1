@@ -1,15 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { StyleSheet, View, Text, StatusBar, TouchableOpacity, ScrollView, RefreshControl } from 'react-native'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import React, { useContext, useState } from 'react'
+import { StyleSheet, View } from 'react-native'
 
-import { UserContext } from '../context/UserContext';
 import { PushCartContext } from '../context/PushCartContext';
 import { db } from '../../firebase';
 import { MapDisplay, PushCartList } from '../components';
 import constants from '../config/constants';
 
 const PushCartMapScreen = ({ navigation }) => {
-    const { user, setUser } = useContext(UserContext);
     const { pushCartList, setPushCartList, selectedPushCart, setSelectedPushCart } = useContext(PushCartContext);
     const [trigger, setTrigger] = useState(-1);
 
