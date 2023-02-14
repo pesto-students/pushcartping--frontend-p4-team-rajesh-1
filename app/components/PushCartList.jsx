@@ -78,7 +78,7 @@ const PushCartList = ({ navigateToPushCart, trigger }) => {
                         <TouchableOpacity
                             onPress={() => {
                                 console.log('somthing with item: ', item)
-                                // navigateToPushCart(item.id)
+                                navigateToPushCart(item)
                             }}>
                             <PushCart cart={item} />
                         </TouchableOpacity>

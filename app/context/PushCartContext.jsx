@@ -5,7 +5,7 @@ export const PushCartContext = createContext();
 
 export const PushCartContextProvider = ({ children }) => {
     const [pushCartList, setPushCartList] = useState({});
-    const [selectedPushCart, setSelectedPushCart] = useState(0);
+    const [selectedPushCart, setSelectedPushCart] = useState({});
 
     // const fetchData = useCallback(async () => {
     //     try {

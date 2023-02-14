@@ -5,7 +5,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Dropdown } from 'react-native-element-dropdown';
 
-import { signInWithPhone, verifySMSCode, checkIfCustomerInDatabase, addCustomerToDatabase, addPhotoToStorage, addVendorToDatabase, addVendorPhotosToStorage } from '../../firebase';
+import { signInWithPhone, verifySMSCode, checkIfCustomerInDatabase, checkIfVendorInDatabase, addCustomerToDatabase, addPhotoToStorage, addVendorToDatabase, addVendorPhotosToStorage } from '../../firebase';
 import constants from '../config/constants'
 import { UserSwitch, ButtonPCP, InputPCP, DropdownPCP } from '../components';
 import { UserContext } from '../context/UserContext';
@@ -72,7 +72,7 @@ const WelcomeScreen = ({ navigation }) => {
                 console.log(Object.keys(response.user))
                 console.log(JSON.stringify(response.user))
                 setUser(response.user);
-                setUserData(prevState => ({ ...prevState, phone: '+91' + phoneNumber }))
+                setUserData(prevState => ({ ...prevState, phone: phoneNumber }))
                 // isUserInDatabase();
                 //goToNextScreen(response.isNewUser)
             })
@@ -90,6 +90,18 @@ const WelcomeScreen = ({ navigation }) => {
             })
             .catch((error) => {
                 console.log('isCustomerInDatabase error:', error);
+            });
+    }
+
+    const isVendorInDatabase = async () => {
+        console.log('isVendorInDatabase user id: ', user.uid)
+        await checkIfVendorInDatabase({ userID: user.uid })
+            .then((response) => {
+                console.log('isVendorInDatabase response, ', response);
+                goToNextScreen(response.code === 0 ? false : true)
+            })
+            .catch((error) => {
+                console.log('isVendorInDatabase error:', error);
             });
     }
 
@@ -160,7 +172,10 @@ const WelcomeScreen = ({ navigation }) => {
         if (!user.uid) return
         console.log('useeffect called, uid: ', user.uid)
         // console.log(JSON.stringify(user))
-        isCustomerInDatabase();
+        if (userData.type === 0)
+            isCustomerInDatabase();
+        else if (userData.type === 0)
+            isVendorInDatabase();
     }, [user]);
 
     // useEffect(() => {
@@ -202,8 +217,22 @@ const WelcomeScreen = ({ navigation }) => {
             quality: 1,
         };
 
-        const result = await launchImageLibrary(options);
-        console.log('result:', result.assets[0])
+        const response = await launchImageLibrary(options);
+        if (response.didCancel) {
+            createAlert('User cancelled camera picker');
+            return;
+        } else if (response.errorCode == 'camera_unavailable') {
+            createAlert('Camera not available on device');
+            return;
+        } else if (response.errorCode == 'permission') {
+            createAlert('Permission not satisfied');
+            return;
+        } else if (response.errorCode == 'others') {
+            createAlert(response.errorMessage);
+            return;
+        }
+        console.log('response:', response.assets[0])
+        setFilePath(response.assets[0].uri);
 
         // launchImageLibrary(options, (response) => {
         //     console.log('Response = ', response);

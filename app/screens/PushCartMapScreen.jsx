@@ -22,9 +22,9 @@ const PushCartMapScreen = ({ navigation }) => {
         setTrigger(index);
     }
 
-    const navigateToPushCart = (index) => {
-        console.log('tryin to navigate to pushcart, index:', index)
-        setSelectedPushCart(pushCartList[index - 1])
+    const navigateToPushCart = (item) => {
+        console.log('tryin to navigate to pushcart, index:', item)
+        setSelectedPushCart(item)
         navigation.navigate(constants.screenPushCartDetails)
     }
 
