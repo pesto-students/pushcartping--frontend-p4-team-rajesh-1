@@ -24,15 +24,18 @@ export default {
     mapPinColorList: ['red', 'blue', 'orange', 'turquoise', 'green', 'gold', 'wheat', 'linen', 'tan', 'tomato', 'aqua', 'teal', 'violet', 'purple', 'indigo', 'yellow', 'navy', 'plum'],
 
     // ONLY FOR TESTING, PLEASE RESET FOR PRODUCTION
+    defaultUserType: 0,
     defaultPhoneNumber: '+919999999999',
+
+    // defaultUserType: 1,
     // defaultPhoneNumber: '+12222222222',
     // defaultPhoneNumber: '+911111111111',
     // defaultPhoneNumber: '+919833242774',
     defaultVerificationCode: '654321',
     defaultUserName: 'Mihir Rego',
     defaultUserEmail: 'mihirego@gmail.com',
-    userLocationLat: 13.019864771741265,
-    userLocationLng: 80.2552468429313,
+    // userLocationLat: 13.019864771741265,
+    // userLocationLng: 80.2552468429313,
 
     db_customer_collection: 'Customers',
     db_vendor_collection: 'Vendors',

@@ -12,7 +12,7 @@ const UserSwitch = ({ containerStyle = {}, containerMargin = [0, 0, 0, 0], callb
     return (
         <View style={containerStyle}>
             <SwitchSelector
-                initial={constants.userTypeCustomer}
+                initial={constants.defaultUserType}
                 onPress={value => callback(value)}
                 textColor={constants.colorBlack}
                 selectedColor={constants.colorWhite}

@@ -16,16 +16,17 @@ const PushCartList = ({ navigateToPushCart, trigger }) => {
         console.log('PushCartList scrolltoListItem')
     }
 
-    // const fetchData = async () => {
-    //     try {
-    //         console.log("trying to get all push carts");
-    //         const samplePushcarts = await getVendorsFromDB()
-    //         return samplePushcarts
-    //         // setPushCartList(samplePushcarts);
-    //     } catch (error) {
-    //         console.log("UserContext error:", error);
-    //     }
-    // };
+    // const timerInterval = 30000
+    // useEffect(() => {
+    //     const timer = setInterval(() => {
+    //         console.log("trying to load all push carts");
+    //         // const data = fetchData()
+    //         getVendorsFromDB()
+    //             .then((data) => setPushCartList(data))
+    //             .catch((error) => console.log('Error in fetching pushcarts:', error))
+    //     }, timerInterval);
+    //     return () => clearInterval(timer);
+    // }, []);
 
     useEffect(() => {
         console.log("trying to load all push carts");
@@ -54,11 +55,17 @@ const PushCartList = ({ navigateToPushCart, trigger }) => {
     };
 
     const refreshCarts = () => {
-        console.log('pressed: ', pushCartList)
-        Object.values(pushCartList).map((item, index) => {
-            console.log('index:', index)
-            console.log('item:', typeof item.latitude)
-        })
+        // console.log('pressed: ', pushCartList)
+        // Object.values(pushCartList).map((item, index) => {
+        //     console.log('index:', index)
+        //     console.log('item:', typeof item.latitude)
+        // })
+
+        console.log("trying to load all push carts");
+        // const data = fetchData()
+        getVendorsFromDB()
+            .then((data) => setPushCartList(data))
+            .catch((error) => console.log('Error in fetching pushcarts:', error))
     }
 
     return (

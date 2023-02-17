@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
+import constants from '../config/constants';
 
 let initialState = {
-    user: { type: 0 },
+    user: { type: constants.defaultUserType },
     // carts: {}
 }
 

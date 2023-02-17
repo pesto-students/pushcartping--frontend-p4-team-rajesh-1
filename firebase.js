@@ -285,3 +285,24 @@ export const getVendorsFromDB = () => {
             });
     })
 }
+
+export const setCurrentVendorLocation = async ({ userID, latitude, longitude }) => {
+    return new Promise((resolve, reject) => {
+        db.collection(constants.db_vendor_collection)
+            .doc(userID)
+            .set({
+                latitude: latitude,
+                longitude: longitude
+            })
+            .then(() => {
+                // console.log('Vendor added!');
+                resolve({ code: 1, msg: 'Vendor location updated' })
+            })
+            .catch((error) => {
+                // User couldn't sign in (bad verification code?)
+                // ...
+                // console.log('couldnt insert new Vendor')
+                reject({ code: 0, msg: 'Could not update vendor location' })
+            });
+    })
+}

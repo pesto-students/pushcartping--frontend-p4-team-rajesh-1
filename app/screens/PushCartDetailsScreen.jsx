@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, View, Image } from 'react-native'
+import { Dimensions, StyleSheet, Text, View, Image, ImageBackground } from 'react-native'
 import React, { useContext, useEffect } from 'react'
 
 import { PushCartContext } from '../context/PushCartContext';
@@ -13,23 +13,37 @@ const PushCartDetailsScreen = () => {
     }, [selectedPushCart])
 
     return (
-        <>
-            <View style={styles.container}>
-                <Text style={{ fontWeight: 'bold' }}>{selectedPushCart.name}</Text>
+        <View style={styles.container}>
+            <ImageBackground
+                // blurRadius={0}
+                source={require('../assets/welcome.jpg')}
+                resizeMode='cover'
+                style={styles.background}>
+
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>{selectedPushCart.name}</Text>
                 <Image
-                    style={{ width: width * .6, aspectRatio: 1, resizeMode: 'contain' }}
+                    style={{ width: width * .6, aspectRatio: 1, resizeMode: 'contain', borderColor: 'white', borderWidth: 2, marginBottom: 10 }}
                     source={{ uri: selectedPushCart.photoURL[0], }}
                 />
-                <Text><Text style={{ fontWeight: 'bold' }}>CATEGORY:</Text> {selectedPushCart.category}</Text>
-                <Text style={{ width: width * .6, numberOfLines: 5 }}><Text style={{ fontWeight: 'bold' }}>DESCRIPTION:</Text> {selectedPushCart.description}</Text>
-                <Text style={{ fontWeight: 'bold' }}>TAGLINE: #{selectedPushCart.tagline}</Text>
-                <Text><Text style={{ fontWeight: 'bold' }}>PHONE:</Text> {selectedPushCart.phone}</Text>
-                <Text><Text style={{ fontWeight: 'bold' }}>EMAIL:</Text> {selectedPushCart.email}</Text>
-            </View>
-            <View>
-                <Text>We will show some reviews here:</Text>
-            </View>
-        </>
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>CATEGORY:</Text>
+                <Text style={[styles.textStyle, { fontWeight: 'normal', marginBottom: 10 }]}>{selectedPushCart.category}</Text>
+
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>DESCRIPTION:</Text>
+                <Text style={[styles.textStyle, { width: width * .6, numberOfLines: 5, textAlign: 'center', marginBottom: 10 }]}>{selectedPushCart.description}</Text>
+
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>TAGLINE:</Text>
+                <Text style={[styles.textStyle, { fontWeight: 'normal', marginBottom: 10 }]}>#{selectedPushCart.tagline}</Text>
+
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>PHONE:</Text>
+                <Text style={[styles.textStyle, { fontWeight: 'normal', marginBottom: 10 }]}>{selectedPushCart.phone}</Text>
+
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>EMAIL:</Text>
+                <Text style={[styles.textStyle, { fontWeight: 'normal', marginBottom: 10 }]}>{selectedPushCart.email}</Text>
+
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>REVIEWS:</Text>
+                <Text style={[styles.textStyle, { width: width * .6, numberOfLines: 5, textAlign: 'center', marginBottom: 10 }]}>No reviews yet! Please check back in a bit, we should have something. Or you could post your own</Text>
+            </ImageBackground>
+        </View>
     )
 }
 
@@ -37,10 +51,20 @@ export default PushCartDetailsScreen
 
 const styles = StyleSheet.create({
     container: {
-        // flex: 1,
-        flexDirection: 'column',
+        flex: 1,
+        // flexDirection: 'column',
         // justifyContent: 'center',
+        // alignItems: 'center',
+        // padding: 20,
+    },
+    background: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
         alignItems: 'center',
-        padding: 20,
+        padding: 10,
+    },
+    textStyle: {
+        color: 'white',
     }
 })
