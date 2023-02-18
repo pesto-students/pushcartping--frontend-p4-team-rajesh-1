@@ -1,14 +1,15 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
-import { View, StyleSheet, ImageBackground, ActivityIndicator, Image, Platform, KeyboardAvoidingView, TouchableHighlight, ToastAndroid } from 'react-native'
+import { View, StyleSheet, ImageBackground, ActivityIndicator, Image, Platform, KeyboardAvoidingView, TouchableHighlight, ToastAndroid, Text } from 'react-native'
 import { FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useSelector, useDispatch } from 'react-redux'
 
-import { signInWithPhone, verifySMSCode, checkIfCustomerInDatabase, checkIfVendorInDatabase, addCustomerToDatabase, addPhotoToStorage, addVendorToDatabase, addVendorPhotosToStorage } from '../../firebase';
+import { signInWithPhone, verifySMSCode, addPhotoToStorage, addVendorPhotosToStorage, } from '../context/firebase';
+import { axFetchCustomerData, axFetchVendorData, axAddCustomerToDatabase, axAddVendorToDatabase } from '../context/axiosAPI';
+
 import constants from '../config/constants'
 import { UserSwitch, ButtonPCP, InputPCP, DropdownPCP } from '../components';
-// import { UserContext } from '../context/UserContext';
 import { addUserEntry } from '../context/rootSlice';
 
 const attemptInvisibleVerification = true
@@ -103,37 +104,26 @@ const WelcomeScreen = ({ navigation }) => {
     const isCustomerInDatabase = async (uid) => {
         setIsLoading(true);
         console.log('isCustomerInDatabase user id: ', uid)
-        await checkIfCustomerInDatabase({ userID: uid })
-            .then((response) => {
-                console.log('isCustomerInDatabase response, ', response);
-                for (let item in response.data) {
-                    console.log(item, response.data[item])
-                    // setUserData(prevState => ({ ...prevState, [item]: response.data[item] }))
-                    dispatch(addUserEntry({ [item]: response.data[item] }))
-                }
-                goToNextScreen(response.code === 0 ? false : true)
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                console.log('isCustomerInDatabase error:', error);
-                setIsLoading(false);
-            });
+        let response = await axFetchCustomerData(uid);
+        console.log('isCustomerInDatabase response:', response)
+
+        for (let item in response.data) {
+            console.log(item, response.data[item])
+            dispatch(addUserEntry({ [item]: response.data[item] }))
+        }
+        goToNextScreen(response.status === 201 ? false : true)
+        setIsLoading(false);
     }
 
     const isVendorInDatabase = async (uid) => {
         setIsLoading(true);
         console.log('isVendorInDatabase user id: ', uid)
-        await checkIfVendorInDatabase({ userID: uid })
-            .then((response) => {
-                console.log('isVendorInDatabase response, ', response);
-                dispatch(addUserEntry(response.data))
-                goToNextScreen(response.code === 0 ? false : true)
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                console.log('isVendorInDatabase error:', error);
-                setIsLoading(false);
-            });
+        let response = await axFetchVendorData(uid);
+        console.log('isVendorInDatabase response:', response)
+
+        dispatch(addUserEntry(response.data))
+        goToNextScreen(response.status === 201 ? false : true)
+        setIsLoading(false);
     }
 
     const addCustomerToDB = async () => {
@@ -152,26 +142,21 @@ const WelcomeScreen = ({ navigation }) => {
                 photoURL = url
                 // setUserData(prevState => ({ ...prevState, photoURL: photoURL }))
                 dispatch(addUserEntry({ photoURL: photoURL }))
-                setIsLoading(false);
+                // setIsLoading(false);
             })
             .catch((error) => {
                 console.log('addCustomerToDB error:', error);
-                setIsLoading(false);
+                // setIsLoading(false);
             });
 
         console.log('photoURL:', photoURL)
 
-        setIsLoading(true);
-        await addCustomerToDatabase({ userID: userSlice.uid, userName: userSlice.name, userEmail: userSlice.email, userPhotoURL: photoURL })
-            .then((response) => {
-                console.log('addCustomerToDB response, ', response);
-                goToNextScreen(response.code === 0 ? false : true)
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                console.log('addCustomerToDB error:', error);
-                setIsLoading(false);
-            });
+        // setIsLoading(true);
+        let response = await axAddCustomerToDatabase({ uid: userSlice.uid, userName: userSlice.name, userEmail: userSlice.email, userPhotoURL: photoURL })
+        console.log('isVendorInDatabase response:', response)
+
+        goToNextScreen(true)
+        setIsLoading(false);
     }
 
     const addVendorToDB = async () => {
@@ -189,46 +174,26 @@ const WelcomeScreen = ({ navigation }) => {
                 console.log('urls', urls)
                 photoURLs = urls
                 // setUserData(prevState => ({ ...prevState, photoURLs: urls }))
-                dispatch(addUserEntry({ photoURLs: urls }))
-                setIsLoading(false);
+                dispatch(addUserEntry({ photoURL: urls }))
+                // setIsLoading(false);
             })
             .catch((error) => {
                 console.log('addPhotoToStorage error:', error);
-                setIsLoading(false);
+                // setIsLoading(false);
             });
 
-        // console.log('photoURLs:', photoURLs)
-
-        setIsLoading(true);
-        await addVendorToDatabase({
-            userID: storestoreuser.uid, userName: userSlice.name, userEmail: userSlice.email, userPhotoURLs: photoURLs,
+        let response = await axAddVendorToDatabase({
+            uid: userSlice.uid, userName: userSlice.name, userEmail: userSlice.email, userPhotoURLs: photoURLs,
             userCategory: userSlice.category, userTagline: userSlice.tagline, userDescription: userSlice.description
-        }).then((response) => {
-            console.log('addVendorToDatabase response, ', response);
-            goToNextScreen(response.code === 0 ? false : true)
-            setIsLoading(false);
-        }).catch((error) => {
-            console.log('addVendorToDatabase error:', error);
-            setIsLoading(false);
-        });
-    }
+        })
+        console.log('isVendorInDatabase response:', response)
 
-    // useEffect(() => {
-    //     if (!rootSlice.uid) return
-    //     console.log('useeffect called, uid: ', rootSlice.uid)
-    //     // console.log(JSON.stringify(user))
-    //     if (rootSlice.type === 0)
-    //         isCustomerInDatabase();
-    //     else if (rootSlice.type === 1)
-    //         isVendorInDatabase();
-    // }, [rootSlice]);
+        goToNextScreen(true)
+        setIsLoading(false);
+    }
 
     useEffect(() => {
         console.log('checking userSlice: ', userSlice)
-        // if (userSlice.type === 0)
-        //     isCustomerInDatabase();
-        // else if (userSlice.type === 1)
-        //     isVendorInDatabase();
     }, [userSlice]);
 
     const goToNextScreen = (isExistingUser) => {
@@ -483,11 +448,11 @@ const WelcomeScreen = ({ navigation }) => {
                                     <View>
                                         <TouchableHighlight onPress={() => chooseFile('photo')}>
                                             <Image
-                                                style={{ width: 50, height: 50 }}
+                                                style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 15 }}
                                                 source={filePath ? { uri: filePath, } : require('../assets/input_icons/user.png')}
                                             />
                                         </TouchableHighlight>
-                                        {filePath && <Icon style={{ position: 'absolute', right: -15, top: -15 }} name="close" size={20} color="#fff" onPress={() => setFilePath('')} />}
+                                        {filePath && <Icon style={{ position: 'absolute', right: -5, top: -5 }} name="close" size={15} color="#fff" onPress={() => setFilePath('')} />}
                                     </View>
 
                                     <InputPCP
@@ -549,7 +514,9 @@ const WelcomeScreen = ({ navigation }) => {
                                 &&
                                 <>
                                     <View style={{ flexDirection: 'row' }}>
-                                        <Icon style={{ marginRight: 10 }} name="plus" size={50} color="#fff" onPress={() => chooseFiles('photo')} />
+                                        <Icon style={{ marginRight: 10 }} name="plus" size={20} color="#fff" onPress={() => chooseFiles('photo')} >
+                                            {filePaths.length === 0 && <Text style={{ paddingLeft: 10 }}>Add Image</Text>}
+                                        </Icon>
                                         {
                                             filePaths.map((item, index) =>
                                                 <TouchableHighlight onPress={() => removePhotoAt(index)}>

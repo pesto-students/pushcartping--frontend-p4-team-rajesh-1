@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useCallback } from "react";
-import { getVendorsFromDB } from '../../firebase';
+// import { getVendorsFromDB } from '../../firebase';
 
 export const PushCartContext = createContext();
 

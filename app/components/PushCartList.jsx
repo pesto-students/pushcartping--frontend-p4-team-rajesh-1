@@ -1,10 +1,8 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native'
-import React, { useCallback, useContext, useEffect, useRef } from 'react'
+import { StyleSheet, Text, TouchableOpacity, FlatList } from 'react-native'
+import React, { useContext, useEffect, useRef } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
 
-import constants from '../config/constants'
-import { getVendorsFromDB } from '../../firebase';
+import { axGetAllVendorsFromDB } from '../context/axiosAPI';
 import { PushCartContext } from '../context/PushCartContext';
 import PushCart from './PushCart'
 
@@ -13,27 +11,21 @@ const PushCartList = ({ navigateToPushCart, trigger }) => {
     const refFlatList = useRef(null)
 
     const scrolltoListItem = () => {
-        console.log('PushCartList scrolltoListItem')
+        // console.log('PushCartList scrolltoListItem')
     }
 
-    // const timerInterval = 30000
-    // useEffect(() => {
-    //     const timer = setInterval(() => {
-    //         console.log("trying to load all push carts");
-    //         // const data = fetchData()
-    //         getVendorsFromDB()
-    //             .then((data) => setPushCartList(data))
-    //             .catch((error) => console.log('Error in fetching pushcarts:', error))
-    //     }, timerInterval);
-    //     return () => clearInterval(timer);
-    // }, []);
-
     useEffect(() => {
-        console.log("trying to load all push carts");
-        // const data = fetchData()
-        getVendorsFromDB()
-            .then((data) => setPushCartList(data))
-            .catch((error) => console.log('Error in fetching pushcarts:', error))
+        async function fetchData() {
+            // console.log("trying to load all push carts");
+            let response = await axGetAllVendorsFromDB()
+            // console.log('PushCartList useEffect :', response)
+            setPushCartList(response.data)
+        }
+        fetchData();
+
+        return () => {
+
+        }
     }, []);
 
     useEffect(() => {
@@ -43,7 +35,7 @@ const PushCartList = ({ navigateToPushCart, trigger }) => {
     }, [trigger]);
 
     const log = (trigger) => {
-        console.log("call from parent");
+        // console.log("call from parent");
 
         if (trigger < 0)
             return;
@@ -54,18 +46,11 @@ const PushCartList = ({ navigateToPushCart, trigger }) => {
             refFlatList.current?.scrollToIndex({ animated: true, index: trigger });
     };
 
-    const refreshCarts = () => {
-        // console.log('pressed: ', pushCartList)
-        // Object.values(pushCartList).map((item, index) => {
-        //     console.log('index:', index)
-        //     console.log('item:', typeof item.latitude)
-        // })
-
-        console.log("trying to load all push carts");
-        // const data = fetchData()
-        getVendorsFromDB()
-            .then((data) => setPushCartList(data))
-            .catch((error) => console.log('Error in fetching pushcarts:', error))
+    const refreshCarts = async () => {
+        // console.log("trying to load all push carts");
+        let response = await axGetAllVendorsFromDB()
+        // console.log('PushCartList useEffect :', response)
+        setPushCartList(response.data)
     }
 
     return (
@@ -91,10 +76,6 @@ const PushCartList = ({ navigateToPushCart, trigger }) => {
                         </TouchableOpacity>
                     }
                     keyExtractor={item => item.name}
-                    // contentContainerStyle={{
-                    //     flexGrow: 1,
-                    //     paddingBottom: 20,
-                    // }}
                     style={styles.carts}
                 />
             }

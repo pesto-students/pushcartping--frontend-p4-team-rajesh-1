@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, StatusBar, TouchableOpacity } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useState, useContext, useEffect, useRef } from 'react'
 import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -25,9 +25,9 @@ const MapDisplay = ({ scrollToItem }) => {
     }
 
     const setNewAddress = (data, details) => {
-        console.log('DATA');
+        // console.log('DATA');
         console.log(JSON.stringify(data));
-        console.log('DETAILS');
+        // console.log('DETAILS');
         console.log(JSON.stringify(details));
 
         let region = {
@@ -40,7 +40,7 @@ const MapDisplay = ({ scrollToItem }) => {
         setLocation(region);
     }
 
-    const timerIntervalInSeconds = 60
+    const timerIntervalInSeconds = 10
     useEffect(() => {
         const timer = setInterval(() => {
             console.log(`This will run after ${timerIntervalInSeconds} seconds!`)
@@ -49,9 +49,31 @@ const MapDisplay = ({ scrollToItem }) => {
         return () => clearInterval(timer);
     }, []);
 
+    // useEffect(() => {
+    //     console.log("HELLO PUSHCARTS")
+    //     console.log(pushCartList)
+
+    //     Object.keys(pushCartList).map(
+    //         (item, index) => {
+    //             console.log('item:', item, 'index:', index)
+    //             console.log(pushCartList[item].name)
+    //             console.log(pushCartList[item].latitude)
+    //             console.log(pushCartList[item].longitude)
+    //         })
+
+    //     return () => {
+
+    //     }
+    // }, [pushCartList])
+
+
+    // const drawPushCarts = () => {
+    //     console.log(pushCartList)
+    // }
+
     let permission;
     const getLocation = async () => {
-        console.log('trying to get locs')
+        // console.log('trying to get locs')
 
         if (!permission) {
             permission = await Location.requestForegroundPermissionsAsync();
@@ -63,9 +85,9 @@ const MapDisplay = ({ scrollToItem }) => {
             }
         }
 
-        console.log('trying to get locs1')
+        // console.log('trying to get locs1')
         let loc = await Location.getCurrentPositionAsync({});
-        console.log('trying to get locs2')
+        // console.log('trying to get locs2')
         if (constants.userLocationLat && constants.userLocationLng) {
             // setUserData(prevState => ({ ...prevState, loc: { 'lat': constants.userLocationLat, 'lng': constants.userLocationLng } }))
             dispatch(addUserEntry({ 'latitude': constants.userLocationLat, 'longitude': constants.userLocationLng }))
@@ -76,7 +98,7 @@ const MapDisplay = ({ scrollToItem }) => {
                 longitudeDelta: 0.004,
             })
         } else {
-            console.log('LOCATION:');
+            // console.log('LOCATION:');
             console.log(JSON.stringify(loc));
 
             // setUserData(prevState => ({ ...prevState, loc: { 'lat': loc.coords.latitude, 'lng': loc.coords.longitude } }))
@@ -91,55 +113,62 @@ const MapDisplay = ({ scrollToItem }) => {
     }
 
     return (
-        location
-        &&
-        <View style={styles.container}>
-            <MapView
-                style={styles.map}
-                provider={MapView.PROVIDER_GOOGLE}
-                region={location}
-                showsUserLocation={true}
-                mapPadding={{ top: 40 }}
-            >
-                {
-                    Object.values(pushCartList).map(
-                        (item, index) =>
-                            <Marker
-                                coordinate={{ latitude: item.latitude, longitude: item.longitude }}
-                                title={item.name}
-                                // pinColor={constants.mapPinColorList[item.id]}
-                                pinColor={'purple'}
-                                key={index}
-                                onPress={(e) => {
-                                    console.log('marker onPress:', index)
-                                    scrollToItem(index);
-                                }}
-                            />)
-                }
-            </MapView>
-            <GooglePlacesAutocomplete
-                ref={ref}
-                placeholder='Search location'
-                fetchDetails={true}
-                onPress={(data, details = null) => setNewAddress(data, details)}
-                onFail={error => console.log(error)}
-                onNotFound={() => console.log('no results')}
-                query={{
-                    key: process.env.GOOGLE_MAPS_API_KEY.toString(),
-                    language: 'en',
-                }}
-                styles={styles.searchBar}
-                // renderLeftButton={() => <FontAwesome5 name="map-marker-alt" size={20} color="black" style={styles.searchButton} />}
-                renderRightButton={() =>
-                    <TouchableOpacity
-                        onPress={() => {
-                            clearSearch();
-                        }}>
-                        <Ionicons name="close" size={30} color="black" style={styles.clearButton} />
-                    </TouchableOpacity>
-                }
-            />
-        </View>
+        <>
+            {
+                location
+                    ?
+                    <View style={styles.container}>
+                        <MapView
+                            style={styles.map}
+                            provider={MapView.PROVIDER_GOOGLE}
+                            region={location}
+                            showsUserLocation={true}
+                            mapPadding={{ top: 40 }}
+                        >
+                            {
+                                Object.keys(pushCartList).map(
+                                    (item, index) =>
+                                        <Marker
+                                            coordinate={{ latitude: pushCartList[item].latitude, longitude: pushCartList[item].longitude }}
+                                            title={pushCartList[item].name}
+                                            // pinColor={constants.mapPinColorList[item.id]}
+                                            // pinColor={'purple'}
+                                            key={index}
+                                            onPress={(e) => {
+                                                console.log('marker onPress:', index)
+                                                scrollToItem(index);
+                                            }}
+                                        />
+                                )
+                            }
+                        </MapView>
+                        <GooglePlacesAutocomplete
+                            ref={ref}
+                            placeholder='Search location'
+                            fetchDetails={true}
+                            onPress={(data, details = null) => setNewAddress(data, details)}
+                            onFail={error => console.log(error)}
+                            onNotFound={() => console.log('no results')}
+                            query={{
+                                key: process.env.GOOGLE_MAPS_API_KEY.toString(),
+                                language: 'en',
+                            }}
+                            styles={styles.searchBar}
+                            // renderLeftButton={() => <FontAwesome5 name="map-marker-alt" size={20} color="black" style={styles.searchButton} />}
+                            renderRightButton={() =>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        clearSearch();
+                                    }}>
+                                    <Ionicons name="close" size={30} color="black" style={styles.clearButton} />
+                                </TouchableOpacity>
+                            }
+                        />
+                    </View>
+                    :
+                    <ActivityIndicator size="large" color="#00ff00" style={styles.container} />
+            }
+        </>
     )
 }
 
@@ -150,7 +179,7 @@ const styles = StyleSheet.create({
         position: 'relative',
         widht: '100%',
         height: '100%',
-        backgroundColor: 'yellow',
+        backgroundColor: 'grey',
     },
     map: {
         position: 'absolute',

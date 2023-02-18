@@ -25,10 +25,14 @@ export default {
 
     // ONLY FOR TESTING, PLEASE RESET FOR PRODUCTION
     defaultUserType: 0,
-    defaultPhoneNumber: '+919999999999',
+    // defaultPhoneNumber: '+919999999999',
+    // defaultPhoneNumber: '+919833242774',
 
     // defaultUserType: 1,
+    // defaultPhoneNumber: '+11111111111',
     // defaultPhoneNumber: '+12222222222',
+    // defaultPhoneNumber: '+13333333333',
+    // defaultPhoneNumber: '+14444444444',
     // defaultPhoneNumber: '+911111111111',
     // defaultPhoneNumber: '+919833242774',
     defaultVerificationCode: '654321',

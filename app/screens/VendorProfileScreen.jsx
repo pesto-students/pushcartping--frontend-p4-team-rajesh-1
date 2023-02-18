@@ -5,6 +5,8 @@ import { useSelector, useDispatch } from 'react-redux'
 import * as Location from 'expo-location';
 import constants from '../config/constants'
 import { addUserEntry } from '../context/rootSlice';
+import { axSetCurrentVendorLocation } from '../context/axiosAPI';
+
 
 let width = Dimensions.get('window').width;
 
@@ -12,12 +14,12 @@ const VendorProfileScreen = () => {
     const userSlice = useSelector((state) => state.root.user)
     const dispatch = useDispatch()
 
-    const timerInterval = 20000
+    const timerIntervalInSeconds = 10
     useEffect(() => {
         const timer = setInterval(() => {
-            console.log(`This will run after ${timerInterval} seconds!`)
+            console.log(`VendorProfileScreen: This will run after ${timerIntervalInSeconds} seconds!`)
             getLocation()
-        }, timerInterval);
+        }, timerIntervalInSeconds * 1000);
         return () => clearInterval(timer);
     }, []);
 
@@ -35,30 +37,15 @@ const VendorProfileScreen = () => {
             }
         }
 
-        console.log('trying to get locs1')
+        // console.log('trying to get locs1')
         let loc = await Location.getCurrentPositionAsync({});
-        console.log('trying to get locs2')
+        // console.log('trying to get locs2')
         if (constants.userLocationLat && constants.userLocationLng) {
-            // setUserData(prevState => ({ ...prevState, loc: { 'lat': constants.userLocationLat, 'lng': constants.userLocationLng } }))
             dispatch(addUserEntry({ 'latitude': constants.userLocationLat, 'longitude': constants.userLocationLng }))
-            // setLocation({
-            //     latitude: constants.userLocationLat,
-            //     longitude: constants.userLocationLng,
-            //     latitudeDelta: 0.004,
-            //     longitudeDelta: 0.004,
-            // })
+            await axSetCurrentVendorLocation({ uid: userSlice.uid, latitude: constants.userLocationLat, longitude: constants.userLocationLng })
         } else {
-            console.log('LOCATION:');
-            console.log(JSON.stringify(loc));
-
-            // setUserData(prevState => ({ ...prevState, loc: { 'lat': loc.coords.latitude, 'lng': loc.coords.longitude } }))
             dispatch(addUserEntry({ 'latitude': loc.coords.latitude, 'longitude': loc.coords.longitude }))
-            // setLocation({
-            //     latitude: loc.coords.latitude,
-            //     longitude: loc.coords.longitude,
-            //     latitudeDelta: 0.004,
-            //     longitudeDelta: 0.004,
-            // })
+            await axSetCurrentVendorLocation({ uid: userSlice.uid, latitude: loc.coords.latitude, longitude: loc.coords.longitude })
         }
     }
 
@@ -77,22 +64,22 @@ const VendorProfileScreen = () => {
                     style={{ width: width * .6, aspectRatio: 1, resizeMode: 'contain', borderColor: 'white', borderWidth: 2, marginBottom: 10 }}
                     source={{ uri: userSlice.photoURL[0], }}
                 />
-                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>CATEGORY:</Text>
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>CATEGORY</Text>
                 <Text style={[styles.textStyle, { fontWeight: 'normal', marginBottom: 10 }]}>{userSlice.category}</Text>
 
-                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>DESCRIPTION:</Text>
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>DESCRIPTION</Text>
                 <Text style={[styles.textStyle, { width: width * .6, numberOfLines: 5, textAlign: 'center', marginBottom: 10 }]}>{userSlice.description}</Text>
 
-                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>TAGLINE:</Text>
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>TAGLINE</Text>
                 <Text style={[styles.textStyle, { fontWeight: 'normal', marginBottom: 10 }]}>#{userSlice.tagline}</Text>
 
-                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>PHONE:</Text>
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>PHONE</Text>
                 <Text style={[styles.textStyle, { fontWeight: 'normal', marginBottom: 10 }]}>{userSlice.phone}</Text>
 
-                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>EMAIL:</Text>
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>EMAIL</Text>
                 <Text style={[styles.textStyle, { fontWeight: 'normal', marginBottom: 10 }]}>{userSlice.email}</Text>
 
-                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>LOCATION:</Text>
+                <Text style={[styles.textStyle, { fontWeight: 'bold' }]}>LOCATION</Text>
                 <Text style={[styles.textStyle, { fontWeight: 'normal' }]}>Lat: {userSlice.latitude}</Text>
                 <Text style={[styles.textStyle, { fontWeight: 'normal' }]}>Lng: {userSlice.longitude}</Text>
             </ImageBackground>

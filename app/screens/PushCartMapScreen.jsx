@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import { PushCartContext } from '../context/PushCartContext';
-import { db } from '../../firebase';
 import { MapDisplay, PushCartList } from '../components';
 import constants from '../config/constants';
 
